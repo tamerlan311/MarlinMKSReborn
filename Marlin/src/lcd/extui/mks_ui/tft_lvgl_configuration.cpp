@@ -132,7 +132,7 @@ void tft_lvgl_init() {
   ui_cfg_init();//不寫入flash
   disp_language_init();//text設置
 
-  hal.watchdog_refresh();     // LVGL init takes time
+  watchdog_refresh();     // LVGL init takes time 喂狗
 
   #if MB(MKS_ROBIN_NANO)
     OUT_WRITE(PB0, LOW);  // HE1
@@ -146,8 +146,6 @@ void tft_lvgl_init() {
   SPI_TFT.spi_init(SPI_FULL_SPEED);
   SPI_TFT.LCD_init();
 
-  hal.watchdog_refresh();     // LVGL init takes time
-
   #if ENABLED(USB_FLASH_DRIVE_SUPPORT)
     uint16_t usb_flash_loop = 1000;
     #if ENABLED(MULTI_VOLUME)
@@ -159,21 +157,19 @@ void tft_lvgl_init() {
     #endif
     do {
       card.media_driver_usbFlash.idle();
-      hal.watchdog_refresh();
+      watchdog_refresh();
       delay(2);
     } while((!card.media_driver_usbFlash.isInserted()) && (usb_flash_loop--));
     card.mount();
   #elif HAS_LOGO_IN_FLASH
-    delay(1000);
-    hal.watchdog_refresh();
-    delay(1000);
+    watchdog_refresh();
   #endif
 
   hal.watchdog_refresh();     // LVGL init takes time
 
   #if ENABLED(SDSUPPORT)
-    UpdateAssets();
-    hal.watchdog_refresh();   // LVGL init takes time
+    UpdateAssets();//加載圖片和字庫
+    watchdog_refresh();   // LVGL init takes time
     TERN_(MKS_TEST, mks_test_get());
   #endif
 
