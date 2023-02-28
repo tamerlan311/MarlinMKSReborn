@@ -78,8 +78,12 @@ void GcodeSuite::M290() {
         #endif
       }
   #else
+    float offs;
     if (parser.seenval('Z') || parser.seenval('S')) {
-      const float offs = constrain(parser.value_axis_units(Z_AXIS), -2, 2);
+      if(baby_step_set_data)
+        offs = parser.value_axis_units(Z_AXIS);
+      else
+        offs = constrain(parser.value_axis_units(Z_AXIS), -2, 2);
       babystep.add_mm(Z_AXIS, offs);
       #if ENABLED(BABYSTEP_ZPROBE_OFFSET)
         if (parser.boolval('P', true)) mod_probe_offset(offs);
