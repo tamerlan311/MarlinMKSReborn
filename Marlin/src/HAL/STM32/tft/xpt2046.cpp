@@ -142,13 +142,17 @@ uint16_t XPT2046::getRawData(const XPTCoordinate coordinate) {
 }
 
 uint16_t XPT2046::HardwareIO(uint16_t data) {
-  __HAL_SPI_ENABLE(&SPIx);
-  while ((SPIx.Instance->SR & SPI_FLAG_TXE) != SPI_FLAG_TXE) {}
-  SPIx.Instance->DR = data;
-  while ((SPIx.Instance->SR & SPI_FLAG_RXNE) != SPI_FLAG_RXNE) {}
-  __HAL_SPI_DISABLE(&SPIx);
+  //__HAL_SPI_ENABLE(&SPIx);
+  //while ((SPIx.Instance->SR & SPI_FLAG_TXE) != SPI_FLAG_TXE) {}
+  //SPIx.Instance->DR = data;
+  //while ((SPIx.Instance->SR & SPI_FLAG_RXNE) != SPI_FLAG_RXNE) {}
+  //__HAL_SPI_DISABLE(&SPIx);
+  //return SPIx.Instance->DR;
 
-  return SPIx.Instance->DR;
+    uint8_t Rdate = 0;
+    uint8_t Tdate = (uint8_t)data;
+    HAL_SPI_TransmitReceive(&SPIx, &Tdate, &Rdate, 1, 1000);
+    return Rdate;
 }
 
 uint16_t XPT2046::SoftwareIO(uint16_t data) {
