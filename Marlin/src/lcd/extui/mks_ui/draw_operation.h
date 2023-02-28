@@ -27,6 +27,7 @@
 
 void lv_draw_operation();
 void lv_clear_operation();
+void disp_more_fan_speed();
 
 #ifdef __cplusplus
   } /* C-declarations for C++ */

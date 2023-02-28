@@ -35,6 +35,7 @@
 #include "SPIFlashStorage.h"
 #include <lvgl.h>
 
+#include "../../../gcode/queue.h"
 #include "../../../MarlinCore.h"
 #include "../../../inc/MarlinConfig.h"
 
@@ -87,8 +88,13 @@ extern uint8_t sel_id;
 uint8_t bmp_public_buf[14 * 1024];
 uint8_t public_buf[513];
 
-extern bool flash_preview_begin, default_preview_flg, gcode_preview_over;
+#ifdef USE_NEW_LVGL_CONF
+  mks_ui_t mks_ui;
+#endif  
 
+extern bool flash_preview_begin, default_preview_flg, gcode_preview_over;
+extern int32_t save_layer_stop_num ;
+extern int32_t save_disp_layer_stop_num;
 void SysTick_Callback() {
   lv_tick_inc(1);
   print_time_count();
@@ -121,11 +127,20 @@ void tft_lvgl_init() {
 
   W25QXX.init(SPI_QUARTER_SPEED);
 
-  gCfgItems_init();
-  ui_cfg_init();
-  disp_language_init();
+  gCfgItems_init();//寫入flash
+  voice_cfg_init();
+  ui_cfg_init();//不寫入flash
+  disp_language_init();//text設置
 
   hal.watchdog_refresh();     // LVGL init takes time
+
+  #if MB(MKS_ROBIN_NANO)
+    OUT_WRITE(PB0, LOW);  // HE1
+  #endif
+
+  #if PIN_EXISTS(USB_POWER_CONTROL)
+    OUT_WRITE(USB_POWER_CONTROL_PIN, HIGH);
+  #endif
 
   // Init TFT first!
   SPI_TFT.spi_init(SPI_FULL_SPEED);
@@ -135,15 +150,18 @@ void tft_lvgl_init() {
 
   #if ENABLED(USB_FLASH_DRIVE_SUPPORT)
     uint16_t usb_flash_loop = 1000;
-    #if ENABLED(MULTI_VOLUME) && !HAS_SD_HOST_DRIVE
-      SET_INPUT_PULLUP(SD_DETECT_PIN);
-      card.changeMedia(IS_SD_INSERTED() ? &card.media_driver_sdcard : &card.media_driver_usbFlash);
+    #if ENABLED(MULTI_VOLUME)
+      #ifndef HAS_SD_HOST_DRIVE
+        SET_INPUT_PULLUP(SD_DETECT_PIN);
+        if (READ(SD_DETECT_PIN) == LOW) card.changeMedia(&card.media_driver_sdcard);
+        else card.changeMedia(&card.media_driver_usbFlash);
+      #endif
     #endif
     do {
       card.media_driver_usbFlash.idle();
       hal.watchdog_refresh();
       delay(2);
-    } while (!card.media_driver_usbFlash.isInserted() && usb_flash_loop--);
+    } while((!card.media_driver_usbFlash.isInserted()) && (usb_flash_loop--));
     card.mount();
   #elif HAS_LOGO_IN_FLASH
     delay(1000);
@@ -219,6 +237,8 @@ void tft_lvgl_init() {
     mks_esp_wifi_init();
     mks_wifi_firmware_update();
   #endif
+    z_offset_add = gCfgItems.babystep_data;
+
   TERN_(HAS_SERVOS, servo_init());
   TERN_(HAS_Z_SERVO_PROBE, probe.servo_probe_init());
   bool ready = true;
@@ -227,10 +247,9 @@ void tft_lvgl_init() {
     if (recovery.valid()) {
       ready = false;
       if (gCfgItems.from_flash_pic)
-        flash_preview_begin = true;
+        flash_preview_begin = false;//true
       else
-        default_preview_flg = true;
-
+        default_preview_flg = false;//true
       uiCfg.print_state = REPRINTING;
 
       #if ENABLED(LONG_FILENAME_HOST_SUPPORT)
@@ -240,11 +259,22 @@ void tft_lvgl_init() {
       #else
         strncpy(list_file.long_name[sel_id], recovery.info.sd_filename, sizeof(list_file.long_name[0]));
       #endif
-      lv_draw_printing();
+      // lv_draw_printing();
+      Layout_stop_num.data = gCfgItems.Layout_stop_data ;
+      Layout_stop_num.bottom_data = gCfgItems.Layout_stop_bottom_data;
+      save_layer_stop_num = gCfgItems.save_layer_stop_num;
+      save_disp_layer_stop_num = gCfgItems.save_disp_layer_stop_num;
+      
+      lv_draw_dialog(DIALOG_TYPE_REPRINT);
     }
   #endif
 
-  if (ready) lv_draw_ready_print();
+  if (ready) {
+#ifdef USE_NEW_LVGL_CONF
+    set_main_screen();
+#endif
+    lv_draw_ready_print();
+  }
 
   #if BOTH(MKS_TEST, SDSUPPORT)
     if (mks_test_flag == 0x1E) mks_gpio_test();
@@ -253,41 +283,39 @@ void tft_lvgl_init() {
 
 static lv_disp_drv_t* disp_drv_p;
 
-#if ENABLED(USE_SPI_DMA_TC)
-  bool lcd_dma_trans_lock = false;
+__IO bool lcd_dma_trans_lock = false;
+
+void dma_tc(struct __DMA_HandleTypeDef * hdma) {
+  lv_disp_flush_ready(disp_drv_p); // Indicate you are ready with the flushing
+  lcd_dma_trans_lock = false;
+#if ENABLED(USE_DMA_FSMC_TC_INT)
+  
 #endif
 
-void dmc_tc_handler(struct __DMA_HandleTypeDef * hdma) {
-  #if ENABLED(USE_SPI_DMA_TC)
-    lv_disp_flush_ready(disp_drv_p);
-    lcd_dma_trans_lock = false;
-    TFT_SPI::Abort();
-  #endif
+#if ENABLED(USE_SPI_DMA_TC)
+  TFT_SPI::Abort();
+#endif
 }
 
 void my_disp_flush(lv_disp_drv_t * disp, const lv_area_t * area, lv_color_t * color_p) {
+
   uint16_t width = area->x2 - area->x1 + 1,
           height = area->y2 - area->y1 + 1;
 
-  disp_drv_p = disp;
-
   SPI_TFT.setWindow((uint16_t)area->x1, (uint16_t)area->y1, width, height);
 
-  #if ENABLED(USE_SPI_DMA_TC)
-    lcd_dma_trans_lock = true;
-    SPI_TFT.tftio.WriteSequenceIT((uint16_t*)color_p, width * height);
-    TFT_SPI::DMAtx.XferCpltCallback = dmc_tc_handler;
-  #else
-    SPI_TFT.tftio.WriteSequence((uint16_t*)color_p, width * height);
-    lv_disp_flush_ready(disp_drv_p); // Indicate you are ready with the flushing
-  #endif
+  for(uint16_t i = 0; i < height; i++)
+    SPI_TFT.tftio.WriteSequence((uint16_t*)(color_p + width * i), width);
+
+  lv_disp_flush_ready(disp); // Indicate you are ready with the flushing
 
   W25QXX.init(SPI_QUARTER_SPEED);
 }
 
-#if ENABLED(USE_SPI_DMA_TC)
-  bool get_lcd_dma_lock() { return lcd_dma_trans_lock; }
-#endif
+bool get_lcd_dma_lock(void) {
+  return lcd_dma_trans_lock;
+}
+
 
 void lv_fill_rect(lv_coord_t x1, lv_coord_t y1, lv_coord_t x2, lv_coord_t y2, lv_color_t bk_color) {
   uint16_t width, height;
@@ -305,7 +333,7 @@ unsigned int getTickDiff(unsigned int curTick, unsigned int lastTick) {
 }
 
 static bool get_point(int16_t *x, int16_t *y) {
-  if (!touch.getRawPoint(x, y)) return false;
+  if (!touch.getRawPoint(x, y)) { return false; }
 
   #if ENABLED(TOUCH_SCREEN_CALIBRATION)
     const calibrationState state = touch_calibration.get_calibration_state();
@@ -325,26 +353,39 @@ static bool get_point(int16_t *x, int16_t *y) {
 
 bool my_touchpad_read(lv_indev_drv_t * indev_driver, lv_indev_data_t * data) {
   static int16_t last_x = 0, last_y = 0;
-  if (get_point(&last_x, &last_y)) {
-    #if TFT_ROTATION == TFT_ROTATE_180
-      data->point.x = TFT_WIDTH - last_x;
-      data->point.y = TFT_HEIGHT - last_y;
-    #else
-      data->point.x = last_x;
-      data->point.y = last_y;
-    #endif
-    data->state = LV_INDEV_STATE_PR;
+  static uint8_t last_touch_state = LV_INDEV_STATE_REL;
+  static int32_t touch_time1 = 0;
+  uint32_t tmpTime, diffTime = 0;
+
+  tmpTime = millis();
+  diffTime = getTickDiff(tmpTime, touch_time1);
+  if (diffTime > 20) {
+    if (get_point(&last_x, &last_y)) {
+
+      if (last_touch_state == LV_INDEV_STATE_PR) return false;
+      data->state = LV_INDEV_STATE_PR;
+
+      // Set the coordinates (if released use the last-pressed coordinates)
+      #if TFT_ROTATION == TFT_ROTATE_180
+        data->point.x = TFT_WIDTH - last_x;
+        data->point.y = TFT_HEIGHT -last_y;
+      #else
+        data->point.x = last_x;
+        data->point.y = last_y;
+      #endif
+
+      last_x = last_y = 0;
+      last_touch_state = LV_INDEV_STATE_PR;
+    }
+    else {
+      if (last_touch_state == LV_INDEV_STATE_PR)
+        data->state = LV_INDEV_STATE_REL;
+      last_touch_state = LV_INDEV_STATE_REL;
+    }
+
+    touch_time1 = tmpTime;
   }
-  else {
-    #if TFT_ROTATION == TFT_ROTATE_180
-      data->point.x = TFT_WIDTH - last_x;
-      data->point.y = TFT_HEIGHT - last_y;
-    #else
-      data->point.x = last_x;
-      data->point.y = last_y;
-    #endif
-    data->state = LV_INDEV_STATE_REL;
-  }
+
   return false; // Return `false` since no data is buffering or left to read
 }
 
@@ -506,15 +547,26 @@ void lv_encoder_pin_init() {
         #if ANY_BUTTON(EN1, EN2, ENC, BACK)
 
           uint8_t newbutton = 0;
-          if (BUTTON_PRESSED(EN1)) newbutton |= EN_A;
-          if (BUTTON_PRESSED(EN2)) newbutton |= EN_B;
-          if (BUTTON_PRESSED(ENC)) newbutton |= EN_C;
-          if (BUTTON_PRESSED(BACK)) newbutton |= EN_D;
+          // if (BUTTON_PRESSED(EN1)) newbutton |= EN_A;
+          // if (BUTTON_PRESSED(EN2)) newbutton |= EN_B;
+          // if (BUTTON_PRESSED(ENC)) newbutton |= EN_C;
+          // if (BUTTON_PRESSED(BACK)) newbutton |= EN_D;
+
+          #if BUTTON_EXISTS(EN1)
+            if (BUTTON_PRESSED(EN1)) newbutton |= EN_A;
+          #endif
+          #if BUTTON_EXISTS(EN2)
+            if (BUTTON_PRESSED(EN2)) newbutton |= EN_B;
+          #endif
+          #if BUTTON_EXISTS(ENC)
+            if (BUTTON_PRESSED(ENC)) newbutton |= EN_C;
+          #endif
+          #if BUTTON_EXISTS(BACK)
+            if (BUTTON_PRESSED(BACK)) newbutton |= EN_D;
+          #endif
 
         #else
-
           constexpr uint8_t newbutton = 0;
-
         #endif
 
         static uint8_t buttons = 0;

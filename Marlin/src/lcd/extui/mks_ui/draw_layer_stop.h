@@ -1,3 +1,4 @@
+
 /**
  * Marlin 3D Printer Firmware
  * Copyright (c) 2020 MarlinFirmware [https://github.com/MarlinFirmware/Marlin]
@@ -22,22 +23,14 @@
 #pragma once
 
 #ifdef __cplusplus
-  extern "C" {
+  extern "C" { /* C-declarations for C++ */
 #endif
 
-void lv_draw_ready_print();
-void mks_disp_test();
-void disp_Limit_ok();
-void disp_Limit_error();
-void disp_det_error();
-void disp_det_ok();
-void lv_clear_ready_print();
-void lv_temp_refr();
 
-void set_main_screen(void);
-void lv_draw_emergemcy();
-void disp_emergency();
+void lv_draw_layer_stop();
+void lv_clear_layer_stop();
 
 #ifdef __cplusplus
   } /* C-declarations for C++ */
 #endif
+

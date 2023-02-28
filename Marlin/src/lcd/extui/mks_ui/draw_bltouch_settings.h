@@ -22,22 +22,16 @@
 #pragma once
 
 #ifdef __cplusplus
-  extern "C" {
+extern "C" { /* C-declarations for C++ */
 #endif
 
-void lv_draw_ready_print();
-void mks_disp_test();
-void disp_Limit_ok();
-void disp_Limit_error();
-void disp_det_error();
-void disp_det_ok();
-void lv_clear_ready_print();
-void lv_temp_refr();
+extern void lv_draw_bltouch_settings(void);
+extern void lv_clear_bltouch_settings();
+extern void disp_step_dist();
+extern void bltouch_do_init(bool resetZoffset);
+extern void disp_bltouch_z_offset_value();
 
-void set_main_screen(void);
-void lv_draw_emergemcy();
-void disp_emergency();
-
+//extern void disp_temp_ready_print();
 #ifdef __cplusplus
-  } /* C-declarations for C++ */
+} /* C-declarations for C++ */
 #endif
