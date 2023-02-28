@@ -213,6 +213,33 @@
  */
 void GcodeSuite::G28() {
   DEBUG_SECTION(log_G28, "G28", DEBUGGING(LEVELING));
+
+  if(Emergemcy_flog)
+  {
+    Emergemcy_finish = true;
+    quickstop_stepper();
+    set_current_from_steppers_for_axis(ALL_AXES_ENUM);
+    #if ENABLED(USE_XMIN_PLUG)
+      current_position.x = 0;
+    #elif ENABLED(USE_XMAX_PLUG)
+      current_position.x = X_MAX_POS;
+    #endif
+
+    #if ENABLED(USE_YMIN_PLUG)
+      current_position.y = 0;
+    #elif ENABLED(USE_YMAX_PLUG)
+      current_position.y = Y_MAX_POS;
+    #endif
+
+    #if ENABLED(USE_ZMIN_PLUG)
+      current_position.z = 0;
+    #elif ENABLED(USE_ZMAX_PLUG)
+      current_position.z = Z_MAX_POS;
+    #endif
+    sync_plan_position();
+    return;
+  }
+
   if (DEBUGGING(LEVELING)) log_machine_info();
 
   TERN_(LASER_MOVE_G28_OFF, cutter.set_inline_enabled(false));  // turn off laser
@@ -319,7 +346,6 @@ void GcodeSuite::G28() {
   TERN_(HAS_DUPLICATION_MODE, set_duplication_enabled(false));
 
   remember_feedrate_scaling_off();
-
   endstops.enable(true); // Enable endstops for next homing move
 
   #if ENABLED(DELTA)
@@ -371,19 +397,96 @@ void GcodeSuite::G28() {
     const float z_homing_height = parser.seenval('R') ? parser.value_linear_units() : Z_HOMING_HEIGHT;
 
     if (z_homing_height && (LINEAR_AXIS_GANG(doX, || doY, || TERN0(Z_SAFE_HOMING, doZ), || doI, || doJ, || doK))) {
+      if(Emergemcy_flog)
+      {
+        Emergemcy_finish = true;
+        quickstop_stepper();
+        set_current_from_steppers_for_axis(ALL_AXES_ENUM);
+        #if ENABLED(USE_XMIN_PLUG)
+          current_position.x = 0;
+        #elif ENABLED(USE_XMAX_PLUG)
+          current_position.x = X_MAX_POS;
+        #endif
+
+        #if ENABLED(USE_YMIN_PLUG)
+          current_position.y = 0;
+        #elif ENABLED(USE_YMAX_PLUG)
+          current_position.y = Y_MAX_POS;
+        #endif
+
+        #if ENABLED(USE_ZMIN_PLUG)
+          current_position.z = 0;
+        #elif ENABLED(USE_ZMAX_PLUG)
+          current_position.z = Z_MAX_POS;
+        #endif
+        sync_plan_position();
+        return;
+      }
       // Raise Z before homing any other axes and z is not already high enough (never lower z)
       if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPGM("Raise Z (before homing) by ", z_homing_height);
       do_z_clearance(z_homing_height);
       TERN_(BLTOUCH, bltouch.init());
     }
-
     // Diagonal move first if both are homing
     TERN_(QUICK_HOME, if (doX && doY) quick_home_xy());
 
+    if(Emergemcy_flog)
+    {
+      Emergemcy_finish = true;
+      quickstop_stepper();
+      set_current_from_steppers_for_axis(ALL_AXES_ENUM);
+
+      #if ENABLED(USE_XMIN_PLUG)
+        current_position.x = 0;
+      #elif ENABLED(USE_XMAX_PLUG)
+        current_position.x = X_MAX_POS;
+      #endif
+
+      #if ENABLED(USE_YMIN_PLUG)
+        current_position.y = 0;
+      #elif ENABLED(USE_YMAX_PLUG)
+        current_position.y = Y_MAX_POS;
+      #endif
+
+      #if ENABLED(USE_ZMIN_PLUG)
+        current_position.z = 0;
+      #elif ENABLED(USE_ZMAX_PLUG)
+        current_position.z = Z_MAX_POS;
+      #endif
+
+      sync_plan_position();
+      return;
+    }
     // Home Y (before X)
     if (ENABLED(HOME_Y_BEFORE_X) && (doY || TERN0(CODEPENDENT_XY_HOMING, doX)))
       homeaxis(Y_AXIS);
+      if(Emergemcy_flog)
+      {
+        Emergemcy_finish = true;
+        quickstop_stepper();
+        set_current_from_steppers_for_axis(ALL_AXES_ENUM);
 
+      #if ENABLED(USE_XMIN_PLUG)
+        current_position.x = 0;
+      #elif ENABLED(USE_XMAX_PLUG)
+        current_position.x = X_MAX_POS;
+      #endif
+
+      #if ENABLED(USE_YMIN_PLUG)
+        current_position.y = 0;
+      #elif ENABLED(USE_YMAX_PLUG)
+        current_position.y = Y_MAX_POS;
+      #endif
+
+      #if ENABLED(USE_ZMIN_PLUG)
+        current_position.z = 0;
+      #elif ENABLED(USE_ZMAX_PLUG)
+        current_position.z = Z_MAX_POS;
+      #endif
+
+        sync_plan_position();
+        return;
+      }
     // Home X
     if (doX || (doY && ENABLED(CODEPENDENT_XY_HOMING) && DISABLED(HOME_Y_BEFORE_X))) {
 
@@ -406,13 +509,65 @@ void GcodeSuite::G28() {
       #else
 
         homeaxis(X_AXIS);
+        if(Emergemcy_flog)
+        {
+          Emergemcy_finish = true;
+          quickstop_stepper();
+          set_current_from_steppers_for_axis(ALL_AXES_ENUM);
 
+          #if ENABLED(USE_XMIN_PLUG)
+            current_position.x = 0;
+          #elif ENABLED(USE_XMAX_PLUG)
+            current_position.x = X_MAX_POS;
+          #endif
+
+          #if ENABLED(USE_YMIN_PLUG)
+            current_position.y = 0;
+          #elif ENABLED(USE_YMAX_PLUG)
+            current_position.y = Y_MAX_POS;
+          #endif
+
+          #if ENABLED(USE_ZMIN_PLUG)
+            current_position.z = 0;
+          #elif ENABLED(USE_ZMAX_PLUG)
+            current_position.z = Z_MAX_POS;
+          #endif
+
+          sync_plan_position();
+          return;
+        }
       #endif
     }
-
     // Home Y (after X)
     if (DISABLED(HOME_Y_BEFORE_X) && doY)
       homeaxis(Y_AXIS);
+      if(Emergemcy_flog)
+      {
+        Emergemcy_finish = true;
+        quickstop_stepper();
+        set_current_from_steppers_for_axis(ALL_AXES_ENUM);
+
+        #if ENABLED(USE_XMIN_PLUG)
+          current_position.x = 0;
+        #elif ENABLED(USE_XMAX_PLUG)
+          current_position.x = X_MAX_POS;
+        #endif
+
+        #if ENABLED(USE_YMIN_PLUG)
+          current_position.y = 0;
+        #elif ENABLED(USE_YMAX_PLUG)
+          current_position.y = Y_MAX_POS;
+        #endif
+
+        #if ENABLED(USE_ZMIN_PLUG)
+          current_position.z = 0;
+        #elif ENABLED(USE_ZMAX_PLUG)
+          current_position.z = Z_MAX_POS;
+        #endif
+
+        sync_plan_position();
+        return;
+      }
 
     TERN_(IMPROVE_HOMING_RELIABILITY, end_slow_homing(saved_motion_state));
 
@@ -425,6 +580,33 @@ void GcodeSuite::G28() {
         #endif
 
         TERN(Z_SAFE_HOMING, home_z_safely(), homeaxis(Z_AXIS));
+        if(Emergemcy_flog)
+        {
+          Emergemcy_finish = true;
+          quickstop_stepper();
+          set_current_from_steppers_for_axis(ALL_AXES_ENUM);
+
+          #if ENABLED(USE_XMIN_PLUG)
+            current_position.x = 0;
+          #elif ENABLED(USE_XMAX_PLUG)
+            current_position.x = X_MAX_POS;
+          #endif
+
+          #if ENABLED(USE_YMIN_PLUG)
+            current_position.y = 0;
+          #elif ENABLED(USE_YMAX_PLUG)
+            current_position.y = Y_MAX_POS;
+          #endif
+
+          #if ENABLED(USE_ZMIN_PLUG)
+            current_position.z = 0;
+          #elif ENABLED(USE_ZMAX_PLUG)
+            current_position.z = Z_MAX_POS;
+          #endif
+
+          sync_plan_position();
+          return;
+        }
         probe.move_z_after_homing();
       }
     #endif
@@ -550,7 +732,7 @@ void GcodeSuite::G28() {
       L64xxManager.set_param((L64XX_axis_t)cv, L6470_ABS_POS, stepper.position(L64XX_axis_xref[cv]));
     }
   #endif
-  
+
   #if ENABLED(AUTO_BED_LEVELING_BILINEAR)
   set_bed_leveling_enabled(true);
   #endif

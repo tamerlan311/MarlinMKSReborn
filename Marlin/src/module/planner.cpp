@@ -1769,7 +1769,15 @@ float Planner::get_axis_position_mm(const AxisEnum axis) {
 void Planner::synchronize() {
   while (has_blocks_queued() || cleaning_buffer_counter
       || TERN0(EXTERNAL_CLOSED_LOOP_CONTROLLER, CLOSED_LOOP_WAITING())
-  ) idle();
+  ) 
+  {
+    if(Emergemcy_flog)
+    {
+      queue.clear();
+      return;
+    }
+    idle();
+  }
 }
 
 /**

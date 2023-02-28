@@ -126,6 +126,8 @@ public:
   #endif
 
   static void move_z_after_homing() {
+    if(Emergemcy_flog)
+      return;
     #ifdef Z_AFTER_HOMING
       do_z_clearance(Z_AFTER_HOMING, true);
     #elif BOTH(Z_AFTER_PROBING, HAS_BED_PROBE)

@@ -753,6 +753,17 @@ void idle(bool no_stepper_sleep/*=false*/) {
     static uint16_t idle_depth = 0;
     if (++idle_depth > 5) SERIAL_ECHOLNPGM("idle() call depth: ", idle_depth);
   #endif
+  // if(Emergemcy_flog)
+  // {
+  //   Emergemcy_finish = true;
+  //   quickstop_stepper();
+  //   set_current_from_steppers_for_axis(ALL_AXES_ENUM);
+  //   // current_position.x = 0;
+  //   // current_position.y = 0;
+  //   // current_position.z = 0;
+  //   sync_plan_position();
+  //   return;
+  // }
 
   // Core Marlin activities
   manage_inactivity(no_stepper_sleep);

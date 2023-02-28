@@ -1512,7 +1512,6 @@ void prepare_line_to_destination() {
    */
   void do_homing_move(const AxisEnum axis, const float distance, const feedRate_t fr_mm_s=0.0, const bool final_approach=true) {
     DEBUG_SECTION(log_move, "do_homing_move", DEBUGGING(LEVELING));
-
     const feedRate_t home_fr_mm_s = fr_mm_s ?: homing_feedrate(axis);
 
     if (DEBUGGING(LEVELING)) {
@@ -1576,6 +1575,10 @@ void prepare_line_to_destination() {
     #endif
 
     planner.synchronize();
+    if(Emergemcy_flog)
+    {
+      return;
+    }
 
     if (is_home_dir) {
 
@@ -1722,6 +1725,11 @@ void prepare_line_to_destination() {
 
   void homeaxis(const AxisEnum axis) {
 
+    if(Emergemcy_flog)
+    {
+      return;
+    }
+
     #if EITHER(MORGAN_SCARA, MP_SCARA)
       // Only Z homing (with probe) is permitted
       if (axis != Z_AXIS) { BUZZ(100, 880); return; }
@@ -1796,9 +1804,17 @@ void prepare_line_to_destination() {
     //
     // Fast move towards endstop until triggered
     //
+    if(Emergemcy_flog)
+    {
+      return;
+    }
     const float move_length = 1.5f * max_length(TERN(DELTA, Z_AXIS, axis)) * axis_home_dir;
     if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPGM("Home Fast: ", move_length, "mm");
     do_homing_move(axis, move_length, 0.0, !use_probe_bump);
+    if(Emergemcy_flog)
+    {
+      return;
+    }
 
     #if BOTH(HOMING_Z_WITH_PROBE, BLTOUCH_SLOW_MODE)
       if (axis == Z_AXIS) bltouch.stow(); // Intermediate STOW (in LOW SPEED MODE)
@@ -1809,6 +1825,10 @@ void prepare_line_to_destination() {
       // Move away from the endstop by the axis HOMING_BUMP_MM
       if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPGM("Move Away: ", -bump, "mm");
       do_homing_move(axis, -bump, TERN(HOMING_Z_WITH_PROBE, (axis == Z_AXIS ? z_probe_fast_mm_s : 0), 0), false);
+      if(Emergemcy_flog)
+      {
+        return;
+      }
 
       #if ENABLED(DETECT_BROKEN_ENDSTOP)
         // Check for a broken endstop
@@ -1842,6 +1862,10 @@ void prepare_line_to_destination() {
       const float rebump = bump * 2;
       if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPGM("Re-bump: ", rebump, "mm");
       do_homing_move(axis, rebump, get_homing_bump_feedrate(axis), true);
+      if(Emergemcy_flog)
+      {
+        return;
+      }
 
       #if BOTH(HOMING_Z_WITH_PROBE, BLTOUCH)
         if (axis == Z_AXIS) bltouch.stow(); // The final STOW
@@ -2130,6 +2154,10 @@ void set_axis_is_at_home(const AxisEnum axis) {
     #endif
     DEBUG_POS("", current_position);
     DEBUG_ECHOLNPGM("<<< set_axis_is_at_home(", AS_CHAR(AXIS_CHAR(axis)), ")");
+  }
+  if(axis == Z_AXIS)
+  {
+      TERN_(BABYSTEP_DISPLAY_TOTAL, send_m290());
   }
 }
 
