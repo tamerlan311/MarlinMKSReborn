@@ -75,6 +75,7 @@ XPT2046 touch;
 
 #if HAS_SPI_FLASH_FONT
   void init_gb2312_font();
+//   void init_gb2312_songti26();
 #endif
 
 static lv_disp_buf_t disp_buf;
