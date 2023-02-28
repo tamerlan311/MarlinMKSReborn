@@ -202,7 +202,9 @@
  *  Y   Home to the Y endstop
  *  Z   Home to the Z endstop
  */
+  extern bool Emergemcy_flog;
 void GcodeSuite::G28() {
+    Emergemcy_flog = 0;
   DEBUG_SECTION(log_G28, "G28", DEBUGGING(LEVELING));
   if (DEBUGGING(LEVELING)) log_machine_info();
 
