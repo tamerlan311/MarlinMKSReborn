@@ -26,6 +26,7 @@
 
 #include "../../module/stepper.h"
 #include "../../module/endstops.h"
+#include "../../lcd/extui/mks_ui/draw_ui.h"
 
 #if HAS_MULTI_HOTEND
   #include "../../module/tool_change.h"

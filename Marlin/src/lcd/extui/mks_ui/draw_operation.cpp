@@ -34,6 +34,8 @@
 
 extern lv_group_t *g;
 static lv_obj_t *scr;
+static lv_obj_t *btn_zoffset, *btn_fan;
+static lv_obj_t *label_zoffset, *label_fan;
 
 enum {
   ID_O_PRE_HEAT = 1,
@@ -44,7 +46,8 @@ enum {
   ID_O_RETURN,
   ID_O_FAN,
   ID_O_POWER_OFF,
-  ID_O_BABY_STEP
+  ID_O_BABY_STEP,
+  ID_O_ZOFFSET,
 };
 
 static lv_obj_t *label_PowerOff;
@@ -97,8 +100,12 @@ static void event_handler(lv_obj_t *obj, lv_event_t event) {
       lv_draw_filament_change();
       break;
     case ID_O_FAN:
+      // lv_clear_operation();
+      // lv_draw_fan();
+      temp_value = fan_speed;
+      keyboard_value = GTempsetting;
       lv_clear_operation();
-      lv_draw_fan();
+      lv_draw_numkeyboard();
       break;
     case ID_O_SPEED:
       lv_clear_operation();
@@ -132,6 +139,39 @@ static void event_handler(lv_obj_t *obj, lv_event_t event) {
 
 void lv_draw_operation() {
   scr = lv_screen_create(OPERATE_UI);
+  
+  lv_obj_t *imgtop = lv_obj_create(scr, nullptr);
+  lv_obj_set_style(imgtop, &tft_style_preHeat_BLUE);
+  lv_obj_set_size(imgtop, 480, 50);
+  lv_obj_set_pos(imgtop, 0, 0);
+
+#if 1
+  btn_zoffset = lv_imgbtn_create(scr, "F:/bmp_more_zoffset.bin", event_handler, ID_O_BABY_STEP);
+  lv_obj_set_pos(btn_zoffset, 109, 136);
+  label_zoffset = lv_label_create_empty(scr);
+  lv_label_set_style(label_zoffset, LV_LABEL_STYLE_MAIN, &tft_style_preHeat_label_BLACK);
+  lv_label_set_text(label_zoffset, leveling_menu.zoffset);
+  lv_obj_align(label_zoffset, btn_zoffset, LV_ALIGN_CENTER, 0, 50);
+
+  btn_fan = lv_imgbtn_create(scr, "F:/bmp_fan_state.bin", event_handler, ID_O_FAN);
+  lv_obj_set_pos(btn_fan, 289, 145);
+  label_fan = lv_label_create_empty(scr);
+  lv_label_set_style(label_fan, LV_LABEL_STYLE_MAIN, &tft_style_preHeat_label_BLACK);
+  lv_obj_align(label_fan, btn_fan, LV_ALIGN_CENTER, 0, 50);
+  disp_more_fan_speed();
+  
+  lv_refr_now(lv_refr_get_disp_refreshing());
+  // lv_imgbtn_set_src_both(buttonReturn, "F:/bmp_preHeat_return.bin");
+  
+  lv_obj_t *buttonReturn = lv_imgbtn_create(scr, "F:/bmp_preHeat_return.bin", event_handler, ID_O_RETURN);
+  lv_obj_set_pos(buttonReturn, 6, 3);
+
+  lv_obj_t *labelname = lv_label_create_empty(scr);
+  lv_label_set_text(labelname, "More");
+  lv_obj_set_style(labelname, &label_dialog_white);
+  lv_obj_set_pos(labelname, 69, 13);
+
+#else
   // Create image buttons
   lv_obj_t *buttonPreHeat  = lv_imgbtn_create(scr, "F:/bmp_temp.bin", INTERVAL_V, titleHeight, event_handler, ID_O_PRE_HEAT);
   lv_obj_t *buttonFilament = lv_imgbtn_create(scr, "F:/bmp_filamentchange.bin", BTN_X_PIXEL + INTERVAL_V * 2, titleHeight, event_handler, ID_O_FILAMENT);
@@ -224,6 +264,7 @@ void lv_draw_operation() {
     lv_label_set_text(label_Back, common_menu.text_back);
     lv_obj_align(label_Back, buttonBack, LV_ALIGN_IN_BOTTOM_MID, 0, BUTTON_TEXT_Y_OFFSET);
   }
+  #endif
 }
 
 // void draw_operation_btn(void) {
@@ -247,4 +288,11 @@ void lv_clear_operation() {
   lv_obj_del(scr);
 }
 
+void disp_more_fan_speed() {
+
+  sprintf_P(public_buf_l, PSTR("%d%%"), (int)thermalManager.fanSpeedPercent(0));
+  lv_label_set_text(label_fan, public_buf_l);
+  lv_obj_align(label_fan, btn_fan, LV_ALIGN_CENTER, 0, 46);
+
+}
 #endif // HAS_TFT_LVGL_UI

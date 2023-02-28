@@ -48,7 +48,7 @@ typedef struct {
 } glyph_dsc_t;
 
 static x_header_t __g_xbf_hd = { .min = 0, .max = 0, .bpp = 0 };
-static uint8_t __g_font_buf[63];
+static uint8_t __g_font_buf[152];//63
 
 static uint8_t *__user_font_getdata(int offset, int size) {
   get_spi_flash_data((char *)__g_font_buf, offset, size);
@@ -95,11 +95,17 @@ static bool __user_font_get_glyph_dsc(const lv_font_t * font, lv_font_glyph_dsc_
 }
 
 lv_font_t gb2312_puhui32;
+// lv_font_t gb2312_puhui11;
 void init_gb2312_font() {
   gb2312_puhui32.get_glyph_bitmap = __user_font_get_bitmap;
   gb2312_puhui32.get_glyph_dsc = __user_font_get_glyph_dsc;
-  gb2312_puhui32.line_height = 21;
+  gb2312_puhui32.line_height = 19;
   gb2312_puhui32.base_line = 0;
+
+  // gb2312_puhui11.get_glyph_bitmap = __user_font_get_bitmap;
+  // gb2312_puhui11.get_glyph_dsc = __user_font_get_glyph_dsc;
+  // gb2312_puhui11.line_height = 10;
+  // gb2312_puhui11.base_line = 0;
 }
 
 #endif // HAS_SPI_FLASH_FONT

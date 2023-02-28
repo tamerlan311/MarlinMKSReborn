@@ -43,26 +43,41 @@ extern uint16_t DeviceCode;
 static const char assets[][LONG_FILENAME_LENGTH] = {
   // Homing screen
   "bmp_zeroAll.bin",
-  "bmp_zero.bin",
-  "bmp_zeroX.bin",
-  "bmp_zeroY.bin",
+  // "bmp_zero.bin",
+  // "bmp_zeroX.bin",
+  // "bmp_zeroY.bin",
   "bmp_zeroZ.bin",
-  "bmp_manual_off.bin",
+  // "bmp_manual_off.bin",
 
   // Tool screen
-  "bmp_preHeat.bin",
+  "bmp_preHeat1.bin",
   "bmp_extruct.bin",
   "bmp_mov.bin",
   "bmp_leveling.bin",
   "bmp_filamentchange.bin",
   "bmp_more.bin",
+  "bmp_tool_back.bin",
+  "bmp_tool_about.bin",
+  "bmp_tool_gcode.bin",
+  "bmp_tool_cool.bin",
+  "bmp_tool_tempset.bin",
+  "bmp_tool_voice.bin",
+  "bmp_tool_endstop.bin",
+
+  //filament change screen
+  "bmp_filamentchange_ext.bin",
+  "bmp_filamentchange_bgr.bin",
+  "bmp_filamentchange_bgh.bin",
+  "bmp_filament_auto.bin",
+  "png_loop_on.bin",
+  "png_loop_off.bin",
 
   // Fan screen
-  "bmp_Add.bin",
-  "bmp_Dec.bin",
-  "bmp_speed255.bin",
-  "bmp_speed127.bin",
-  "bmp_speed0.bin",
+  // "bmp_Add.bin",
+  // "bmp_Dec.bin",
+  // "bmp_speed255.bin",
+  // "bmp_speed127.bin",
+  // "bmp_speed0.bin",
 
   "bmp_bed.bin",
   "bmp_step1_degree.bin",
@@ -76,12 +91,25 @@ static const char assets[][LONG_FILENAME_LENGTH] = {
   #if HAS_MULTI_EXTRUDER
     "bmp_extru2.bin",
   #endif
-  "bmp_speed_high.bin",
+  // "bmp_speed_high.bin",
   "bmp_speed_slow.bin",
-  "bmp_speed_normal.bin",
+  // "bmp_speed_normal.bin",
   "bmp_step1_mm.bin",
   "bmp_step5_mm.bin",
   "bmp_step10_mm.bin",
+  "bmp_preHeat_top.bin",
+  "bmp_preHeat_return.bin",
+  "bmp_preHeat_Add1.bin",
+  "bmp_preHeat_Dec.bin",
+  "bmp_preHeat_Ext1.bin",
+  "bmp_preHeat_Bed.bin",
+  "bmp_preHeat_Ext1_W.bin",
+  "bmp_preHeat_Bed_W.bin",
+  "bmp_preHeat_red.bin",
+  "bmp_preHeat_speed0.bin",
+  "bmp_preHeat_abs.bin",
+  "bmp_preHeat_pla.bin",
+  
 
   // Select file screen
   "bmp_pageUp.bin",
@@ -98,9 +126,10 @@ static const char assets[][LONG_FILENAME_LENGTH] = {
   "bmp_yDec.bin",
   "bmp_zAdd.bin",
   "bmp_zDec.bin",
-  "bmp_step_move0_1.bin",
+  // "bmp_step_move0_1.bin",
   "bmp_step_move1.bin",
-  "bmp_step_move10.bin",
+  // "bmp_step_move10.bin",
+  "bmp_stop_allMotor.bin",
 
   // Operation screen
   "bmp_auto_off.bin",
@@ -111,9 +140,9 @@ static const char assets[][LONG_FILENAME_LENGTH] = {
   "bmp_move_opr.bin",
 
   // Change speed screen
-  "bmp_step1_percent.bin",
-  "bmp_step5_percent.bin",
-  "bmp_step10_percent.bin",
+  // "bmp_step1_percent.bin",
+  // "bmp_step5_percent.bin",
+  // "bmp_step10_percent.bin",
   "bmp_extruct_sel.bin",
   "bmp_mov_changespeed.bin",
   "bmp_mov_sel.bin",
@@ -121,9 +150,10 @@ static const char assets[][LONG_FILENAME_LENGTH] = {
 
   // Printing screen
   "bmp_pause.bin",
-  "bmp_resume.bin",
+  // "bmp_resume.bin",
   "bmp_stop.bin",
   "bmp_ext1_state.bin",
+  "bmp_continue.bin",
   #if HAS_MULTI_EXTRUDER
     "bmp_ext2_state.bin",
   #endif
@@ -131,7 +161,12 @@ static const char assets[][LONG_FILENAME_LENGTH] = {
   "bmp_fan_state.bin",
   "bmp_time_state.bin",
   "bmp_zpos_state.bin",
+  "bmp_movs_state.bin",
+  "bmp_flows_state.bin",
+  "bmp_prints_state.bin",
   "bmp_operate.bin",
+  "bmp_runout_err.bin",
+  "bmp_reprint_warning.bin",
 
   // Manual Level screen (only if auto level is disabled)
   #if DISABLED(AUTO_BED_LEVELING_BILINEAR)
@@ -139,31 +174,42 @@ static const char assets[][LONG_FILENAME_LENGTH] = {
     "bmp_leveling2.bin",
     "bmp_leveling3.bin",
     "bmp_leveling4.bin",
-    "bmp_leveling5.bin",
+    // "bmp_leveling5.bin",
+    "bmp_leveling_return.bin",
+    "bmp_leveling_bg.bin",
   #endif
 
   // Language Select screen
   #if HAS_LANG_SELECT_SCREEN
     "bmp_language.bin",
-    "bmp_simplified_cn.bin",
-    "bmp_simplified_cn_sel.bin",
-    "bmp_traditional_cn.bin",
-    "bmp_traditional_cn_sel.bin",
-    "bmp_english.bin",
-    "bmp_english_sel.bin",
-    "bmp_russian.bin",
-    "bmp_russian_sel.bin",
-    "bmp_spanish.bin",
-    "bmp_spanish_sel.bin",
-    "bmp_french.bin",
-    "bmp_french_sel.bin",
-    "bmp_italy.bin",
-    "bmp_italy_sel.bin",
+    // "bmp_simplified_cn.bin",
+    // "bmp_simplified_cn_sel.bin",
+    // "bmp_traditional_cn.bin",
+    // "bmp_traditional_cn_sel.bin",
+    // "bmp_english.bin",
+    // "bmp_english_sel.bin",
+    // "bmp_russian.bin",
+    // "bmp_russian_sel.bin",
+    // "bmp_spanish.bin",
+    // "bmp_spanish_sel.bin",
+    // "bmp_french.bin",
+    // "bmp_french_sel.bin",
+    // "bmp_italy.bin",
+    // "bmp_italy_sel.bin",
+    "bmp_language_bg_r.bin",
+    "bmp_language_bg_b.bin",
+    "bmp_language_bg_g.bin",
+    "bmp_language_bg_h.bin",
+    "bmp_language_set_r.bin",
+    "bmp_language_set_b.bin",
+    "bmp_language_set_g.bin",
+    "bmp_language_set_h.bin",
   #endif // HAS_LANG_SELECT_SCREEN
 
   // G-code preview
   #if HAS_GCODE_DEFAULT_VIEW_IN_FLASH
     "bmp_preview.bin",
+    "bmp_gcode_send.bin",
   #endif
 
   #if HAS_LOGO_IN_FLASH
@@ -171,8 +217,8 @@ static const char assets[][LONG_FILENAME_LENGTH] = {
   #endif
 
   // Settings screen
-  "bmp_about.bin",
-  "bmp_eeprom_settings.bin",
+  // "bmp_about.bin",
+  // "bmp_eeprom_settings.bin",
   "bmp_machine_para.bin",
   "bmp_function1.bin",
 
@@ -180,20 +226,24 @@ static const char assets[][LONG_FILENAME_LENGTH] = {
   "bmp_printing.bin",
   "bmp_set.bin",
   "bmp_tool.bin",
+  "bmp_ready_exit1.bin",
+  "bmp_Emergency.bin",
 
   // Base icons
-  "bmp_arrow.bin",
-  "bmp_back70x40.bin",
-  "bmp_value_blank.bin",
-  "bmp_blank_sel.bin",
-  "bmp_disable.bin",
-  "bmp_enable.bin",
+  // "bmp_arrow.bin",
+  // "bmp_back70x40.bin",
+  // "bmp_value_blank.bin",
+  // "bmp_blank_sel.bin",
+  // "bmp_disable.bin",
+  // "bmp_enable.bin",
   "bmp_return.bin",
 
   #if ENABLED(MKS_WIFI_MODULE)
     // Wifi screen
     "bmp_wifi.bin",
     "bmp_cloud.bin",
+    "bmp_wifi_return.bin",
+    "bmp_wifi_reconnect.bin",
   #endif
 
   #if ENABLED(MULTI_VOLUME)
@@ -204,22 +254,42 @@ static const char assets[][LONG_FILENAME_LENGTH] = {
   #endif
 
   // Babystep screen
-  "bmp_baby_move0_01.bin",
-  "bmp_baby_move0_05.bin",
-  "bmp_baby_move0_1.bin",
+  // "bmp_baby_move0_01.bin",
+  // "bmp_baby_move0_05.bin",
+  // "bmp_baby_move0_1.bin",
+  "bmp_babystep_add.bin",
+  "bmp_babystep_del.bin",
+  "bmp_more_zoffset.bin",
+  "bmp_level_zoffset.bin",
+  "bmp_print_more.bin",
 
   // More screen
-  "bmp_custom1.bin",
-  "bmp_custom2.bin",
-  "bmp_custom3.bin",
-  "bmp_custom4.bin",
-  "bmp_custom5.bin",
-  "bmp_custom6.bin",
-  "bmp_custom7.bin"
+  // "bmp_custom1.bin",
+  // "bmp_custom2.bin",
+  // "bmp_custom3.bin",
+  // "bmp_custom4.bin",
+  // "bmp_custom5.bin",
+  // "bmp_custom6.bin",
+  // "bmp_custom7.bin",
+
+  // bltouch settings screen
+  // "bmp_init_state.bin",
+
+  //endstop screen
+  "bmp_endstop_on.bin",
+  "bmp_endstop_off.bin",
+
+  //voice screens
+  "bmp_voice_on.bin",
+  "bmp_voice_off.bin",
+
+  //tempsetting screens
+  "bmp_tempsetting_bg.bin",
 };
 
 #if HAS_SPI_FLASH_FONT
-  static char fonts[][LONG_FILENAME_LENGTH] = { "FontUNIGBK.bin" };
+  static char fonts[][LONG_FILENAME_LENGTH] = { "FontUNIGBK.bin",};// "gb2312_songti26.bin", };
+  // static char fonts_2[][LONG_FILENAME_LENGTH] = { "gb2312_songti26.bin",};
 #endif
 
 uint8_t currentFlashPage = 0;
@@ -284,6 +354,15 @@ void spiFlashErase_PIC() {
     for (Font_sectorcnt = 0; Font_sectorcnt < 32 - 1; Font_sectorcnt++) {
       watchdog_refresh();
       W25QXX.SPI_FLASH_BlockErase(FONTINFOADDR + Font_sectorcnt * 64 * 1024);
+    }
+  }
+
+  void spiFlashErase_FONT_2() {
+    volatile uint32_t Font_sectorcnt = 0;
+    W25QXX.init(SPI_FULL_SPEED);
+    for (Font_sectorcnt = 0; Font_sectorcnt < 32 - 1; Font_sectorcnt++) {
+      watchdog_refresh();
+      W25QXX.SPI_FLASH_BlockErase(FONTINFOADDR_2 + Font_sectorcnt * 64 * 1024);
     }
   }
 #endif
@@ -403,6 +482,7 @@ uint32_t Pic_Info_Write(uint8_t *P_name, uint32_t P_size) {
   #define ASSET_TYPE_TITLE_LOGO 2
   #define ASSET_TYPE_G_PREVIEW  3
   #define ASSET_TYPE_FONT       4
+  #define ASSET_TYPE_FONT_2     5
   static void loadAsset(SdFile &dir, dir_t& entry, const char *fn, int8_t assetType) {
     SdFile file;
     char dosFilename[FILENAME_LENGTH];
@@ -478,6 +558,15 @@ uint32_t Pic_Info_Write(uint8_t *P_name, uint32_t P_size) {
         Pic_Write_Addr += pbr;
       } while (pbr >= BMP_WRITE_BUF_LEN);
     }
+    else if (assetType == ASSET_TYPE_FONT_2) {
+      Pic_Write_Addr = UNIGBK_FLASH_ADDR_2;
+      do {
+        watchdog_refresh();
+        pbr = file.read(public_buf, BMP_WRITE_BUF_LEN);
+        W25QXX.SPI_FLASH_BufferWrite(public_buf, Pic_Write_Addr, pbr);
+        Pic_Write_Addr += pbr;
+      } while (pbr >= BMP_WRITE_BUF_LEN);
+    }
 
     file.close();
 
@@ -487,6 +576,9 @@ uint32_t Pic_Info_Write(uint8_t *P_name, uint32_t P_size) {
   }
 
   void UpdateAssets() {
+    // bool test = card.isMounted();
+    // if (!test) 
+    //   return;
     if (!card.isMounted()) return;
     SdFile dir, root = card.getroot();
     if (dir.open(&root, assetsPath, O_RDONLY)) {
@@ -499,6 +591,7 @@ uint32_t Pic_Info_Write(uint8_t *P_name, uint32_t P_size) {
         disp_assets_update_progress("Erasing fonts...");
         watchdog_refresh();
         spiFlashErase_FONT();
+        // spiFlashErase_FONT_2();
       #endif
 
       disp_assets_update_progress("Reading files...");
@@ -507,8 +600,10 @@ uint32_t Pic_Info_Write(uint8_t *P_name, uint32_t P_size) {
         // If we don't get a long name, but gets a short one, try it
         if (card.longFilename[0] == 0 && d.name[0] != 0)
           dosName2LongName((const char*)d.name, card.longFilename);
-        if (card.longFilename[0] == 0) continue;
-        if (card.longFilename[0] == '.') continue;
+        if (card.longFilename[0] == 0) 
+          continue;
+        if (card.longFilename[0] == '.') 
+          continue;
 
         int8_t a = arrayFindStr(assets, COUNT(assets), card.longFilename);
         if (a >= 0 && a < (int8_t)COUNT(assets)) {
@@ -525,10 +620,14 @@ uint32_t Pic_Info_Write(uint8_t *P_name, uint32_t P_size) {
           continue;
         }
 
-        #if HAS_SPI_FLASH_FONT
+        #if HAS_SPI_FLASH_FONT//字庫
           a = arrayFindStr(fonts, COUNT(fonts), card.longFilename);
           if (a >= 0 && a < (int8_t)COUNT(fonts))
             loadAsset(dir, d, fonts[a], ASSET_TYPE_FONT);
+
+          // a = arrayFindStr(fonts_2, COUNT(fonts_2), card.longFilename);
+          // if (a >= 0 && a < (int8_t)COUNT(fonts_2))
+          //   loadAsset(dir, d, fonts_2[a], ASSET_TYPE_FONT_2);
         #endif
       }
       dir.rename(&root, bakPath);
@@ -591,6 +690,11 @@ void lv_pic_test(uint8_t *P_Rbuff, uint32_t addr, uint32_t size) {
   void get_spi_flash_data(const char *rec_buf, int addr, int size) {
     W25QXX.init(SPI_FULL_SPEED);
     W25QXX.SPI_FLASH_BufferRead((uint8_t *)rec_buf, UNIGBK_FLASH_ADDR + addr, size);
+  }
+
+  void get_spi_flash_data_2(const char *rec_buf, int addr, int size) {
+    W25QXX.init(SPI_FULL_SPEED);
+    W25QXX.SPI_FLASH_BufferRead((uint8_t *)rec_buf, UNIGBK_FLASH_ADDR_2 + addr, size);
   }
 #endif
 

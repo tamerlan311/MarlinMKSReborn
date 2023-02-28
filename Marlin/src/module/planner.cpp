@@ -68,6 +68,7 @@
 #include "temperature.h"
 #include "../lcd/marlinui.h"
 #include "../gcode/parser.h"
+#include "../lcd/extui/mks_ui/draw_ui.h"
 
 #include "../MarlinCore.h"
 

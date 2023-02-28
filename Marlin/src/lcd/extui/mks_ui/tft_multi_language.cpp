@@ -31,6 +31,7 @@
 
 common_menu_def              common_menu;
 main_menu_def                main_menu;
+main_menu_def_new            main_menu_new;
 preheat_menu_def             preheat_menu;
 move_menu_def                move_menu;
 home_menu_def                home_menu;
@@ -54,10 +55,13 @@ language_menu_def            language_menu;
 print_file_dialog_menu_def   print_file_dialog_menu;
 filesys_menu_def             filesys_menu;
 tool_menu_def                tool_menu;
+voice_menu_def               voice_menu;
 MachinePara_menu_def         MachinePara_menu;
 pause_msg_def                pause_msg_menu;
 eeprom_def                   eeprom_menu;
 media_select_menu_def        media_select_menu;
+about_MENU_def               about_MENU;
+printing_def                 printing_MENU;
 
 // TODO: Make all strings PSTR and update accessors for the benefit of AVR
 
@@ -281,6 +285,14 @@ void machine_setting_disp() {
     machine_menu.Xoffset         = OFFSET_X_CN;
     machine_menu.Yoffset         = OFFSET_Y_CN;
     machine_menu.Zoffset         = OFFSET_Z_CN;
+
+    machine_menu.BLTouchLevelingConfTitle = BLTOUCH_LEVELING_TITTLE_CN;
+    machine_menu.BLTouchLevelingConf      = BLTOUCH_LEVELING_CN;
+    machine_menu.BLTouchInit              = BLTOUCH_INIT_CN;
+    machine_menu.BLTouchOffsetpos         = BLTOUCH_ZOFFSETPOS_CN;
+    machine_menu.BLTouchOffsetneg         = BLTOUCH_ZOFFSETNEG_CN;
+    machine_menu.BLTouchSave              = BLTOUCH_SAVE_CN;
+    machine_menu.BLTouchTest              = BLTOUCH_TEST_CN;
 
     machine_menu.HomingSensitivityConfTitle = HOMING_SENSITIVITY_CONF_TITLE_CN;
     machine_menu.X_Sensitivity              = X_SENSITIVITY_CN;
@@ -510,6 +522,14 @@ void machine_setting_disp() {
     machine_menu.Xoffset         = OFFSET_X_T_CN;
     machine_menu.Yoffset         = OFFSET_Y_T_CN;
     machine_menu.Zoffset         = OFFSET_Z_T_CN;
+
+    machine_menu.BLTouchLevelingConfTitle = BLTOUCH_LEVELING_TITTLE_T_CN;
+    machine_menu.BLTouchLevelingConf      = BLTOUCH_LEVELING_T_CN;
+    machine_menu.BLTouchInit              = BLTOUCH_INIT_T_CN;
+    machine_menu.BLTouchOffsetpos         = BLTOUCH_ZOFFSETPOS_T_CN;
+    machine_menu.BLTouchOffsetneg         = BLTOUCH_ZOFFSETNEG_T_CN;
+    machine_menu.BLTouchSave              = BLTOUCH_SAVE_T_CN;
+    machine_menu.BLTouchTest              = BLTOUCH_TEST_T_CN;
 
     machine_menu.HomingSensitivityConfTitle = HOMING_SENSITIVITY_CONF_TITLE_T_CN;
     machine_menu.X_Sensitivity              = X_SENSITIVITY_T_CN;
@@ -743,6 +763,14 @@ void machine_setting_disp() {
     machine_menu.Yoffset         = OFFSET_Y_EN;
     machine_menu.Zoffset         = OFFSET_Z_EN;
 
+    machine_menu.BLTouchLevelingConfTitle = BLTOUCH_LEVELING_TITTLE_EN;
+    machine_menu.BLTouchLevelingConf      = BLTOUCH_LEVELING_EN;
+    machine_menu.BLTouchInit              = BLTOUCH_INIT_EN;
+    machine_menu.BLTouchOffsetpos         = BLTOUCH_ZOFFSETPOS_EN;
+    machine_menu.BLTouchOffsetneg         = BLTOUCH_ZOFFSETNEG_EN;
+    machine_menu.BLTouchSave              = BLTOUCH_SAVE_EN;
+    machine_menu.BLTouchTest              = BLTOUCH_TEST_EN;
+
     machine_menu.HomingSensitivityConfTitle = HOMING_SENSITIVITY_CONF_TITLE_EN;
     machine_menu.X_Sensitivity              = X_SENSITIVITY_EN;
     machine_menu.Y_Sensitivity              = Y_SENSITIVITY_EN;
@@ -797,7 +825,7 @@ void disp_language_init() {
   language_menu.chinese_s  = LANGUAGE_S_CN;
   language_menu.chinese_t  = LANGUAGE_T_CN;
   language_menu.english    = LANGUAGE_EN;
-  language_menu.russian    = LANGUAGE_RU;
+  language_menu.russian    = RU_LANGUAGE;
   language_menu.spanish    = LANGUAGE_SP;
   language_menu.german     = LANGUAGE_GE;
   language_menu.japan      = LANGUAGE_JP;
@@ -865,6 +893,38 @@ void disp_language_init() {
       common_menu.pause_special_title   = PRINTING_PAUSE_GBK;
       common_menu.operate_special_title = PRINTING_OPERATION_GBK;
       //
+      about_MENU.printerModel           = PRINTER_MODEL_CN;
+      about_MENU.printVolume            = BUILD_SIZE_CN;
+      about_MENU.filamentDiameter       = FILAMENT_DIAMETER_CN;
+      about_MENU.inputVoltage           = INPUT_VOLTAGE_CN;
+      about_MENU.version                = VERSION_CN;
+      about_MENU.support                = SUPPORT_CN;
+      about_MENU.contact                = SALES_CN;
+      //
+      printing_MENU.continueprint       = CONTINUE_PRINT_CN;
+      printing_MENU.add_filament        = ADD_FILAMENT_CN;
+      printing_MENU.back                = BACK_CN;
+      printing_MENU.found_reprint       = FOUND_REPRINT_CN;
+      printing_MENU.stop_print          = STOP_PRINT_CN;
+      printing_MENU.pause_print         = PAUSE_PRINT_CN;
+      printing_MENU.file_printed        = FILE_PRINTED_CN;
+      printing_MENU.print_return        = PRINT_RETURN_CN;
+      printing_MENU.FILAMENT_OUT        = FILAMENT_OUT_1_CN;
+      printing_MENU.FILAMENT_OUT_1        = FILAMENT_OUT_2_CN;
+      printing_MENU.FILAMENT_OUT_2        = FILAMENT_OUT_3_CN;
+      printing_MENU.print_complete      = PRINT_COMPLETE_CN;
+      printing_MENU.print_it_again      = PRINT_IT_AGAIN_CN;
+      printing_MENU.choose_file         = CHOOSE_FILE_CN;
+      printing_MENU.heating             = HEATING_CN;
+      printing_MENU.no_file_found       = NO_FILE_FOUND_CN;
+      //
+      #if ENABLED(MKS_WIFI_MODULE)
+        // tips
+        tips_menu.joining      = TEXT_WIFI_JOINING_CN;
+        tips_menu.failedJoin   = TEXT_WIFI_FAILED_JOIN_CN;
+        tips_menu.wifiConected = TEXT_WIFI_WIFI_CONECTED_CN;
+      #endif
+      //
       main_menu.title        = TITLE_READYPRINT_CN;
       main_menu.preheat      = PREHEAT_TEXT_CN;
       main_menu.move         = MOVE_TEXT_CN;
@@ -877,6 +937,14 @@ void disp_language_init() {
       main_menu.set          = SET_TEXT_CN;
       main_menu.more         = MORE_TEXT_CN;
       main_menu.tool         = TOOL_TEXT_CN;
+      main_menu.Emergency    = EMERGEMCY_CN;
+      main_menu.ok           = DIALOG_OK_CN;
+      main_menu.Ext          = EXT_CN;
+      main_menu.hotbed       = HOTBED_CN;
+      main_menu.low          = LOW_CN;
+      main_menu.high         = HIGH_CN;
+      main_menu.stop         = STOP_CN;
+      main_menu.Heating_nozzle = HEATING_NOZZLE_CN;
       // TOOL
       tool_menu.title        = TOOL_TEXT_CN;
       tool_menu.preheat      = TOOL_PREHEAT_CN;
@@ -887,6 +955,21 @@ void disp_language_init() {
       tool_menu.autoleveling = TOOL_AUTO_LEVELING_CN;
       tool_menu.filament     = TOOL_FILAMENT_CN;
       tool_menu.more         = TOOL_MORE_CN;
+      tool_menu.endstop      = ENDSTOP_CN;
+      tool_menu.voice        = VOICE_CN;
+      tool_menu.tempsetting  = TEMPSETTING_CN;
+      tool_menu.cool         = COOL_CN;
+      tool_menu.tringger     = ENDSTOP_TRIGGER_CN;
+      tool_menu.open         = ENDSTOP_OPEN_CN;
+      tool_menu.x_endstop    = ENDSTOP_X_ENDSTOP_CN;
+      tool_menu.y_endstop    = ENDSTOP_Y_ENDSTOP_CN;
+      tool_menu.z_endstop    = ENDSTOP_Z_ENDSTOP_CN;
+      tool_menu.material_detection = ENDSTOP_MATERIAL_DETECTION_CN;
+      //VOICE
+      voice_menu.button_sound        = BUTTON_VOICE_CN;
+      voice_menu.endstop_sound       = ENDSTOP_VOICE_CN;
+      voice_menu.print_complete_tone = PRINT_COMPLRTION_TONE_CN;
+      voice_menu.no_filament_tone    = NO_FILAMENT_TONE_CN;
       //
       preheat_menu.adjust_title = TITLE_ADJUST_CN;
       preheat_menu.title        = TITLE_PREHEAT_CN;
@@ -931,6 +1014,7 @@ void disp_language_init() {
       leveling_menu.position3 = LEVELING_POINT3_TEXT_CN;
       leveling_menu.position4 = LEVELING_POINT4_TEXT_CN;
       leveling_menu.position5 = LEVELING_POINT5_TEXT_CN;
+      leveling_menu.zoffset   = Z_OFF_SET_CN;
       //
       set_menu.title        = TITLE_SET_CN;
       set_menu.filesys      = FILESYS_TEXT_CN;
@@ -975,6 +1059,7 @@ void disp_language_init() {
       wifi_menu.title = WIFI_TEXT;
       wifi_menu.cloud     = CLOUD_TEXT_CN;
       wifi_menu.reconnect = WIFI_RECONNECT_TEXT_CN;
+      wifi_menu.wifi_connect = WIFI_CONNECTED_CN;
       // CLOUD
       cloud_menu.title        = TITLE_CLOUD_TEXT_CN;
       cloud_menu.bind         = CLOUD_BINDED_CN;
@@ -1062,6 +1147,7 @@ void disp_language_init() {
       printing_more_menu.temp       = PRINTING_TEMP_CN;
 
       print_file_dialog_menu.confirm               = DIALOG_CONFIRM_CN;
+      print_file_dialog_menu.reloading             = RELOADING_CN;
       print_file_dialog_menu.cancel                = DIALOG_CANCLE_CN;
       print_file_dialog_menu.print_file            = DIALOG_PRINT_MODEL_CN;
       print_file_dialog_menu.cancel_print          = DIALOG_CANCEL_PRINT_CN;
@@ -1077,6 +1163,7 @@ void disp_language_init() {
       print_file_dialog_menu.print_time       = DIALOG_PRINT_TIME_CN;
       print_file_dialog_menu.reprint          = DIALOG_REPRINT_CN;
       print_file_dialog_menu.wifi_enable_tips = DIALOG_WIFI_ENABLE_TIPS_CN;
+      print_file_dialog_menu.autolevelingTips   = DIALOG_AUTO_LEVELING_TIPS_CN;
 
       pause_msg_menu.pausing       = MESSAGE_PAUSING_CN;
       pause_msg_menu.changing      = MESSAGE_CHANGING_CN;
@@ -1112,6 +1199,38 @@ void disp_language_init() {
             common_menu.pause_special_title   = PRINTING_PAUSE_GBK;
             common_menu.operate_special_title = PRINTING_OPERATION_GBK;
             //
+            about_MENU.printerModel           = PRINTER_MODEL_T_CN;
+            about_MENU.printVolume            = BUILD_SIZE_T_CN;
+            about_MENU.filamentDiameter       = FILAMENT_DIAMETER_T_CN;
+            about_MENU.inputVoltage           = INPUT_VOLTAGE_T_CN;
+            about_MENU.version                = VERSION_T_CN;
+            about_MENU.support                = SUPPORT_T_CN;
+            about_MENU.contact                = SALES_T_CN;
+            //
+            printing_MENU.continueprint       = CONTINUE_PRINT_T_CN;
+            printing_MENU.add_filament        = ADD_FILAMENT_T_CN;
+            printing_MENU.back                = BACK_T_CN;
+            printing_MENU.found_reprint       = FOUND_REPRINT_T_CN;
+            printing_MENU.stop_print          = STOP_PRINT_T_CN;
+            printing_MENU.pause_print         = PAUSE_PRINT_T_CN;
+            printing_MENU.file_printed        = FILE_PRINTED_T_CN;
+            printing_MENU.print_return        = PRINT_RETURN_T_CN;
+            printing_MENU.FILAMENT_OUT        = FILAMENT_OUT_1_T_CN;
+            printing_MENU.FILAMENT_OUT_1      = FILAMENT_OUT_2_T_CN;
+            printing_MENU.FILAMENT_OUT_2      = FILAMENT_OUT_3_T_CN;
+            printing_MENU.print_complete      = PRINT_COMPLETE_T_CN;
+            printing_MENU.print_it_again      = PRINT_IT_AGAIN_T_CN;
+            printing_MENU.choose_file         = CHOOSE_FILE_T_CN;
+            printing_MENU.heating             = HEATING_T_CN;
+      printing_MENU.no_file_found       = NO_FILE_FOUND_T_CN;
+            //
+            #if ENABLED(MKS_WIFI_MODULE)
+              // tips
+              tips_menu.joining      = TEXT_WIFI_JOINING_T_CN;
+              tips_menu.failedJoin   = TEXT_WIFI_FAILED_JOIN_T_CN;
+              tips_menu.wifiConected = TEXT_WIFI_WIFI_CONECTED_T_CN;
+            #endif
+            //
             main_menu.title        = TITLE_READYPRINT_T_CN;
             main_menu.preheat      = PREHEAT_TEXT_T_CN;
             main_menu.move         = MOVE_TEXT_T_CN;
@@ -1124,6 +1243,14 @@ void disp_language_init() {
             main_menu.set          = SET_TEXT_T_CN;
             main_menu.more         = MORE_TEXT_T_CN;
             main_menu.tool         = TOOL_TEXT_T_CN;
+            main_menu.Emergency    = EMERGEMCY_T_CN;
+            main_menu.ok           = DIALOG_OK_T_CN;
+            main_menu.Ext          = EXT_T_CN;
+            main_menu.hotbed       = HOTBED_T_CN;
+            main_menu.low          = LOW_T_CN;
+            main_menu.high         = HIGH_T_CN;
+            main_menu.stop         = STOP_T_CN;
+            main_menu.Heating_nozzle = HEATING_NOZZLE_T_CN;
             // TOOL
             tool_menu.title        = TOOL_TEXT_T_CN;
             tool_menu.preheat      = TOOL_PREHEAT_T_CN;
@@ -1134,6 +1261,21 @@ void disp_language_init() {
             tool_menu.autoleveling = TOOL_AUTO_LEVELING_T_CN;
             tool_menu.filament     = TOOL_FILAMENT_T_CN;
             tool_menu.more         = TOOL_MORE_T_CN;
+            tool_menu.cool         = COOL_T_CN;
+            tool_menu.endstop      = ENDSTOP_T_CN;
+            tool_menu.voice        = VOICE_T_CN;
+            tool_menu.tempsetting  = TEMPSETTING_T_CN;
+            tool_menu.tringger     = ENDSTOP_TRIGGER_T_CN;
+            tool_menu.open         = ENDSTOP_OPEN_T_CN;
+            tool_menu.x_endstop    = ENDSTOP_X_ENDSTOP_T_CN;
+            tool_menu.y_endstop    = ENDSTOP_Y_ENDSTOP_T_CN;
+            tool_menu.z_endstop    = ENDSTOP_Z_ENDSTOP_T_CN;
+            tool_menu.material_detection = ENDSTOP_MATERIAL_DETECTION_T_CN;
+            //VOICE
+            voice_menu.button_sound        = BUTTON_VOICE_T_CN;
+            voice_menu.endstop_sound       = ENDSTOP_VOICE_T_CN;
+            voice_menu.print_complete_tone = PRINT_COMPLRTION_TONE_T_CN;
+            voice_menu.no_filament_tone    = NO_FILAMENT_TONE_T_CN;
             //
             preheat_menu.adjust_title = TITLE_ADJUST_T_CN;
             preheat_menu.title        = TITLE_PREHEAT_T_CN;
@@ -1177,6 +1319,7 @@ void disp_language_init() {
             leveling_menu.position3 = LEVELING_POINT3_TEXT_T_CN;
             leveling_menu.position4 = LEVELING_POINT4_TEXT_T_CN;
             leveling_menu.position5 = LEVELING_POINT5_TEXT_T_CN;
+            leveling_menu.zoffset   = Z_OFF_SET_T_CN;
             //
             set_menu.title        = TITLE_SET_T_CN;
             set_menu.filesys      = FILESYS_TEXT_T_CN;
@@ -1220,6 +1363,7 @@ void disp_language_init() {
             wifi_menu.title     = WIFI_TEXT;
             wifi_menu.cloud     = CLOUD_TEXT_T_CN;
             wifi_menu.reconnect = WIFI_RECONNECT_TEXT_T_CN;
+            wifi_menu.wifi_connect = WIFI_CONNECTED_T_CN;
             // CLOUD
             cloud_menu.title        = TITLE_CLOUD_TEXT_T_CN;
             cloud_menu.bind         = CLOUD_BINDED_T_CN;
@@ -1307,6 +1451,7 @@ void disp_language_init() {
             printing_more_menu.temp       = PRINTING_TEMP_T_CN;
 
             print_file_dialog_menu.confirm               = DIALOG_CONFIRM_T_CN;
+            print_file_dialog_menu.reloading             = RELOADING_T_CN;
             print_file_dialog_menu.cancel                = DIALOG_CANCLE_T_CN;
             print_file_dialog_menu.print_file            = DIALOG_PRINT_MODEL_T_CN;
             print_file_dialog_menu.cancel_print          = DIALOG_CANCEL_PRINT_T_CN;
@@ -1321,6 +1466,7 @@ void disp_language_init() {
             print_file_dialog_menu.print_time          = DIALOG_PRINT_TIME_T_CN;
             print_file_dialog_menu.reprint             = DIALOG_REPRINT_T_CN;
             print_file_dialog_menu.wifi_enable_tips    = DIALOG_WIFI_ENABLE_TIPS_T_CN;
+            print_file_dialog_menu.autolevelingTips   = DIALOG_AUTO_LEVELING_TIPS_T_CN;
 
             pause_msg_menu.pausing       = MESSAGE_PAUSING_T_CN;
             pause_msg_menu.changing      = MESSAGE_CHANGING_T_CN;
@@ -1352,6 +1498,38 @@ void disp_language_init() {
             common_menu.pause_special_title   = PRINTING_PAUSE_OTHER_LANGUGE;
             common_menu.operate_special_title = PRINTING_OPERATION_OTHER_LANGUGE;
             //
+            about_MENU.printerModel           = PRINTER_MODEL_EN;
+            about_MENU.printVolume            = BUILD_SIZE_EN;
+            about_MENU.filamentDiameter       = FILAMENT_DIAMETER_EN;
+            about_MENU.inputVoltage           = INPUT_VOLTAGE_EN;
+            about_MENU.version                = VERSION_EN;
+            about_MENU.support                = SUPPORT_EN;
+            about_MENU.contact                = SALES_EN;
+            //
+            printing_MENU.continueprint       = CONTINUE_PRINT_EN;
+            printing_MENU.add_filament        = ADD_FILAMENT_EN;
+            printing_MENU.back                = BACK_EN;
+            printing_MENU.found_reprint       = FOUND_REPRINT_EN;
+            printing_MENU.stop_print          = STOP_PRINT_EN;
+            printing_MENU.pause_print         = PAUSE_PRINT_EN;
+            printing_MENU.file_printed        = FILE_PRINTED_EN;
+            printing_MENU.print_return        = PRINT_RETURN_EN;
+            printing_MENU.FILAMENT_OUT        = FILAMENT_OUT_1_EN;
+            printing_MENU.FILAMENT_OUT_1        = FILAMENT_OUT_2_EN;
+            printing_MENU.FILAMENT_OUT_2        = FILAMENT_OUT_3_EN;
+            printing_MENU.print_complete      = PRINT_COMPLETE_EN;
+            printing_MENU.print_it_again      = PRINT_IT_AGAIN_EN;
+            printing_MENU.choose_file         = CHOOSE_FILE_EN;
+            printing_MENU.heating             = HEATING_EN;
+      printing_MENU.no_file_found       = NO_FILE_FOUND_EN;
+            //
+            #if ENABLED(MKS_WIFI_MODULE)
+              // tips
+              tips_menu.joining      = TEXT_WIFI_JOINING_EN;
+              tips_menu.failedJoin   = TEXT_WIFI_FAILED_JOIN_EN;
+              tips_menu.wifiConected = TEXT_WIFI_WIFI_CONECTED_EN;
+            #endif
+            //
             main_menu.title        = TITLE_READYPRINT_EN;
             main_menu.preheat      = PREHEAT_TEXT_EN;
             main_menu.move         = MOVE_TEXT_EN;
@@ -1364,6 +1542,14 @@ void disp_language_init() {
             main_menu.set          = SET_TEXT_EN;
             main_menu.more         = MORE_TEXT_EN;
             main_menu.tool         = TOOL_TEXT_EN;
+            main_menu.Emergency    = EMERGEMCY_EN;
+            main_menu.ok           = DIALOG_OK_EN;
+            main_menu.Ext          = EXT_EN;
+            main_menu.hotbed       = HOTBED_EN;
+            main_menu.low          = LOW_EN;
+            main_menu.high         = HIGH_EN;
+            main_menu.stop         = STOP_EN;
+            main_menu.Heating_nozzle = HEATING_NOZZLE_EN;
             // TOOL
             tool_menu.title        = TOOL_TEXT_EN;
             tool_menu.preheat      = TOOL_PREHEAT_EN;
@@ -1374,6 +1560,21 @@ void disp_language_init() {
             tool_menu.autoleveling = TOOL_AUTO_LEVELING_EN;
             tool_menu.filament     = TOOL_FILAMENT_EN;
             tool_menu.more         = TOOL_MORE_EN;
+            tool_menu.endstop      = ENDSTOP_EN;
+            tool_menu.voice        = VOICE_EN;
+            tool_menu.tempsetting  = TEMPSETTING_EN;
+            tool_menu.cool         = COOL_EN;
+            tool_menu.tringger     = ENDSTOP_TRIGGER_EN;
+            tool_menu.open         = ENDSTOP_OPEN_EN;
+            tool_menu.x_endstop    = ENDSTOP_X_ENDSTOP_EN;
+            tool_menu.y_endstop    = ENDSTOP_Y_ENDSTOP_EN;
+            tool_menu.z_endstop    = ENDSTOP_Z_ENDSTOP_EN;
+            tool_menu.material_detection = ENDSTOP_MATERIAL_DETECTION_EN;
+            //VOICE
+            voice_menu.button_sound        = BUTTON_VOICE_EN;
+            voice_menu.endstop_sound       = ENDSTOP_VOICE_EN;
+            voice_menu.print_complete_tone = PRINT_COMPLRTION_TONE_EN;
+            voice_menu.no_filament_tone    = NO_FILAMENT_TONE_EN;
             //
             preheat_menu.adjust_title = TITLE_ADJUST_EN;
             preheat_menu.title        = TITLE_PREHEAT_EN;
@@ -1412,6 +1613,7 @@ void disp_language_init() {
             leveling_menu.position3 = LEVELING_POINT3_TEXT_EN;
             leveling_menu.position4 = LEVELING_POINT4_TEXT_EN;
             leveling_menu.position5 = LEVELING_POINT5_TEXT_EN;
+            leveling_menu.zoffset   = Z_OFF_SET_EN;
             //
             set_menu.title        = TITLE_SET_EN;
             set_menu.filesys      = FILESYS_TEXT_EN;
@@ -1457,6 +1659,7 @@ void disp_language_init() {
             wifi_menu.title     = WIFI_TEXT;
             wifi_menu.cloud     = CLOUD_TEXT_EN;
             wifi_menu.reconnect = WIFI_RECONNECT_TEXT_EN;
+            wifi_menu.wifi_connect = WIFI_CONNECTED_EN;
 
             cloud_menu.title        = TITLE_CLOUD_TEXT_EN;
             cloud_menu.bind         = CLOUD_BINDED_EN;
@@ -1542,6 +1745,7 @@ void disp_language_init() {
             printing_more_menu.temp       = PRINTING_TEMP_EN;
 
             print_file_dialog_menu.confirm               = DIALOG_CONFIRM_EN;
+            print_file_dialog_menu.reloading             = RELOADING_EN;
             print_file_dialog_menu.cancel                = DIALOG_CANCLE_EN;
             print_file_dialog_menu.print_file            = DIALOG_PRINT_MODEL_EN;
             print_file_dialog_menu.cancel_print          = DIALOG_CANCEL_PRINT_EN;
@@ -1555,6 +1759,7 @@ void disp_language_init() {
             print_file_dialog_menu.print_time            = DIALOG_PRINT_TIME_EN;
             print_file_dialog_menu.reprint               = DIALOG_REPRINT_EN;
             print_file_dialog_menu.wifi_enable_tips      = DIALOG_WIFI_ENABLE_TIPS_EN;
+            print_file_dialog_menu.autolevelingTips   = DIALOG_AUTO_LEVELING_TIPS_EN;
 
             pause_msg_menu.pausing       = MESSAGE_PAUSING_EN;
             pause_msg_menu.changing      = MESSAGE_CHANGING_EN;
@@ -1586,6 +1791,38 @@ void disp_language_init() {
             common_menu.pause_special_title   = PRINTING_PAUSE_OTHER_LANGUGE;
             common_menu.operate_special_title = PRINTING_OPERATION_OTHER_LANGUGE;
             //
+            about_MENU.printerModel           = PRINTER_MODEL_RU;
+            about_MENU.printVolume            = BUILD_SIZE_RU;
+            about_MENU.filamentDiameter       = FILAMENT_DIAMETER_RU;
+            about_MENU.inputVoltage           = INPUT_VOLTAGE_RU;
+            about_MENU.version                = VERSION_RU;
+            about_MENU.support                = SUPPORT_RU;
+            about_MENU.contact                = SALES_RU;
+            //
+            printing_MENU.continueprint       = CONTINUE_PRINT_RU;
+            printing_MENU.add_filament        = ADD_FILAMENT_RU;
+            printing_MENU.back                = BACK_RU;
+            printing_MENU.found_reprint       = FOUND_REPRINT_RU;
+            printing_MENU.stop_print          = STOP_PRINT_RU;
+            printing_MENU.pause_print         = PAUSE_PRINT_RU;
+            printing_MENU.file_printed        = FILE_PRINTED_RU;
+            printing_MENU.print_return        = PRINT_RETURN_RU;
+            printing_MENU.FILAMENT_OUT        = FILAMENT_OUT_1_RU;
+            printing_MENU.FILAMENT_OUT_1        = FILAMENT_OUT_2_RU;
+            printing_MENU.FILAMENT_OUT_2        = FILAMENT_OUT_2_RU;
+            printing_MENU.print_complete      = PRINT_COMPLETE_RU;
+            printing_MENU.print_it_again      = PRINT_IT_AGAIN_RU;
+            printing_MENU.choose_file         = CHOOSE_FILE_EN;
+            printing_MENU.heating             = HEATING_RU;
+      printing_MENU.no_file_found       = NO_FILE_FOUND_RU;
+            //
+            #if ENABLED(MKS_WIFI_MODULE)
+              // tips
+              tips_menu.joining      = TEXT_WIFI_JOINING_RU;
+              tips_menu.failedJoin   = TEXT_WIFI_FAILED_JOIN_RU;
+              tips_menu.wifiConected = TEXT_WIFI_WIFI_CONECTED_RU;
+            #endif
+            //
             main_menu.title        = TITLE_READYPRINT_RU;
             main_menu.preheat      = PREHEAT_TEXT_RU;
             main_menu.move         = MOVE_TEXT_RU;
@@ -1598,6 +1835,14 @@ void disp_language_init() {
             main_menu.set          = SET_TEXT_RU;
             main_menu.more         = MORE_TEXT_RU;
             main_menu.tool         = TOOL_TEXT_RU;
+            main_menu.Emergency    = EMERGEMCY_RU;
+            main_menu.ok           = DIALOG_OK_RU;
+            main_menu.Ext          = EXT_RU;
+            main_menu.hotbed       = HOTBED_RU;
+            main_menu.low          = LOW_EN;
+            main_menu.high         = HIGH_EN;
+            main_menu.stop         = STOP_EN;
+            main_menu.Heating_nozzle = HEATING_NOZZLE_EN;
             // TOOL
             tool_menu.title        = TOOL_TEXT_RU;
             tool_menu.preheat      = TOOL_PREHEAT_RU;
@@ -1608,6 +1853,21 @@ void disp_language_init() {
             tool_menu.autoleveling = TOOL_AUTO_LEVELING_RU;
             tool_menu.filament     = TOOL_FILAMENT_RU;
             tool_menu.more         = TOOL_MORE_RU;
+            tool_menu.cool         = COOL_RU;
+            tool_menu.tempsetting  = TEMPSETTING_RU;
+            tool_menu.endstop      = ENDSTOP_RU;
+            tool_menu.voice        = VOICE_RU;
+            tool_menu.tringger     = ENDSTOP_TRIGGER_RU;
+            tool_menu.open         = ENDSTOP_OPEN_RU;
+            tool_menu.x_endstop    = ENDSTOP_X_ENDSTOP_RU;
+            tool_menu.y_endstop    = ENDSTOP_Y_ENDSTOP_RU;
+            tool_menu.z_endstop    = ENDSTOP_Z_ENDSTOP_RU;
+            tool_menu.material_detection = ENDSTOP_MATERIAL_DETECTION_RU;
+            //VOICE
+            voice_menu.button_sound        = BUTTON_VOICE_RU;
+            voice_menu.endstop_sound       = ENDSTOP_VOICE_RU;
+            voice_menu.print_complete_tone = PRINT_COMPLRTION_TONE_RU;
+            voice_menu.no_filament_tone    = NO_FILAMENT_TONE_RU;
             //
             preheat_menu.adjust_title = TITLE_ADJUST_RU;
             preheat_menu.title        = TITLE_PREHEAT_RU;
@@ -1646,6 +1906,7 @@ void disp_language_init() {
             leveling_menu.position3 = LEVELING_POINT3_TEXT_RU;
             leveling_menu.position4 = LEVELING_POINT4_TEXT_RU;
             leveling_menu.position5 = LEVELING_POINT5_TEXT_RU;
+            leveling_menu.zoffset   = Z_OFF_SET_EN;
             //
             set_menu.title        = TITLE_SET_RU;
             set_menu.filesys      = FILESYS_TEXT_RU;
@@ -1689,6 +1950,7 @@ void disp_language_init() {
             wifi_menu.title     = WIFI_TEXT;
             wifi_menu.cloud     = CLOUD_TEXT_RU;
             wifi_menu.reconnect = WIFI_RECONNECT_TEXT_RU;
+            wifi_menu.wifi_connect = WIFI_CONNECTED_RU;
 
             machine_menu.next          = NEXT_RU;
             machine_menu.previous      = PREVIOUS_RU;
@@ -1773,6 +2035,14 @@ void disp_language_init() {
             machine_menu.Xoffset         = OFFSET_X_RU;
             machine_menu.Yoffset         = OFFSET_Y_RU;
             machine_menu.Zoffset         = OFFSET_Z_RU;
+
+            machine_menu.BLTouchLevelingConfTitle = BLTOUCH_LEVELING_TITTLE_RU;
+            machine_menu.BLTouchLevelingConf      = BLTOUCH_LEVELING_RU;
+            machine_menu.BLTouchInit              = BLTOUCH_INIT_RU;
+            machine_menu.BLTouchOffsetpos         = BLTOUCH_ZOFFSETPOS_RU;
+            machine_menu.BLTouchOffsetneg         = BLTOUCH_ZOFFSETNEG_RU;
+            machine_menu.BLTouchSave              = BLTOUCH_SAVE_RU;
+            machine_menu.BLTouchTest              = BLTOUCH_TEST_RU;
 
             machine_menu.FilamentConfTitle   = FILAMENT_CONF_TITLE_RU;
             machine_menu.InLength            = FILAMENT_IN_LENGTH_RU;
@@ -1867,6 +2137,7 @@ void disp_language_init() {
             printing_more_menu.speed      = PRINTING_CHANGESPEED_RU;
             printing_more_menu.temp       = PRINTING_TEMP_RU;
             print_file_dialog_menu.confirm               = DIALOG_CONFIRM_RU;
+            print_file_dialog_menu.reloading             = RELOADING_RU;
             print_file_dialog_menu.cancel                = DIALOG_CANCLE_RU;
             print_file_dialog_menu.print_file            = DIALOG_PRINT_MODEL_RU;
             print_file_dialog_menu.cancel_print          = DIALOG_CANCEL_PRINT_RU;
@@ -1880,6 +2151,7 @@ void disp_language_init() {
             print_file_dialog_menu.print_time            = DIALOG_PRINT_TIME_RU;
             print_file_dialog_menu.reprint               = DIALOG_REPRINT_RU;
             print_file_dialog_menu.wifi_enable_tips      = DIALOG_WIFI_ENABLE_TIPS_RU;
+            print_file_dialog_menu.autolevelingTips   = DIALOG_AUTO_LEVELING_TIPS_RU;
 
             pause_msg_menu.pausing       = MESSAGE_PAUSING_RU;
             pause_msg_menu.changing      = MESSAGE_CHANGING_RU;
@@ -1911,6 +2183,38 @@ void disp_language_init() {
             common_menu.pause_special_title   = PRINTING_PAUSAR_SP;
             common_menu.operate_special_title = PRINTING_AJUSTES_SP;
             //
+            about_MENU.printerModel           = PRINTER_MODEL_SP;
+            about_MENU.printVolume            = BUILD_SIZE_SP;
+            about_MENU.filamentDiameter       = FILAMENT_DIAMETER_SP;
+            about_MENU.inputVoltage           = INPUT_VOLTAGE_SP;
+            about_MENU.version                = VERSION_SP;
+            about_MENU.support                = SUPPORT_SP;
+            about_MENU.contact                = SALES_SP;
+            //
+            printing_MENU.continueprint       = CONTINUE_PRINT_SP;
+            printing_MENU.add_filament        = ADD_FILAMENT_SP;
+            printing_MENU.back                = BACK_SP;
+            printing_MENU.found_reprint       = FOUND_REPRINT_SP;
+            printing_MENU.stop_print          = STOP_PRINT_SP;
+            printing_MENU.pause_print         = PAUSE_PRINT_SP;
+            printing_MENU.file_printed        = FILE_PRINTED_SP;
+            printing_MENU.print_return        = PRINT_RETURN_SP;
+            printing_MENU.FILAMENT_OUT        = FILAMENT_OUT_1_SP;
+            printing_MENU.FILAMENT_OUT_1        = FILAMENT_OUT_2_SP;
+            printing_MENU.FILAMENT_OUT_2        = FILAMENT_OUT_3_SP;
+            printing_MENU.print_complete      = PRINT_COMPLETE_SP;
+            printing_MENU.print_it_again      = PRINT_IT_AGAIN_SP;
+            printing_MENU.choose_file         = CHOOSE_FILE_EN;
+            printing_MENU.heating             = HEATING_SP;
+      printing_MENU.no_file_found       = NO_FILE_FOUND_SP;
+            //
+            #if ENABLED(MKS_WIFI_MODULE)
+              // tips
+              tips_menu.joining      = TEXT_WIFI_JOINING_SP;
+              tips_menu.failedJoin   = TEXT_WIFI_FAILED_JOIN_SP;
+              tips_menu.wifiConected = TEXT_WIFI_WIFI_CONECTED_SP;
+            #endif
+            //
             main_menu.title        = TITLE_READYPRINT_SP;
             main_menu.preheat      = PREHEAT_TEXT_SP;
             main_menu.move         = MOVE_TEXT_SP;
@@ -1923,6 +2227,14 @@ void disp_language_init() {
             main_menu.set          = SET_TEXT_SP;
             main_menu.more         = MORE_TEXT_SP;
             main_menu.tool         = TOOL_TEXT_SP;
+            main_menu.Emergency    = EMERGEMCY_SP;
+            main_menu.ok           = DIALOG_OK_SP;
+            main_menu.Ext          = EXT_SP;
+            main_menu.hotbed       = HOTBED_SP;
+            main_menu.low          = LOW_EN;
+            main_menu.high         = HIGH_EN;
+            main_menu.stop         = STOP_EN;
+            main_menu.Heating_nozzle = HEATING_NOZZLE_EN;
             // TOOL
             tool_menu.title        = TOOL_TEXT_SP;
             tool_menu.preheat      = TOOL_PREHEAT_SP;
@@ -1933,6 +2245,21 @@ void disp_language_init() {
             tool_menu.autoleveling = TOOL_AUTO_LEVELING_SP;
             tool_menu.filament     = TOOL_FILAMENT_SP;
             tool_menu.more         = TOOL_MORE_SP;
+            tool_menu.cool         = COOL_SP;
+            tool_menu.endstop      = ENDSTOP_SP;
+            tool_menu.voice        = VOICE_SP;
+            tool_menu.tempsetting  = TEMPSETTING_SP;
+            tool_menu.tringger     = ENDSTOP_TRIGGER_SP;
+            tool_menu.open         = ENDSTOP_OPEN_SP;
+            tool_menu.x_endstop    = ENDSTOP_X_ENDSTOP_SP;
+            tool_menu.y_endstop    = ENDSTOP_Y_ENDSTOP_SP;
+            tool_menu.z_endstop    = ENDSTOP_Z_ENDSTOP_SP;
+            tool_menu.material_detection = ENDSTOP_MATERIAL_DETECTION_SP;
+            //VOICE
+            voice_menu.button_sound        = BUTTON_VOICE_SP;
+            voice_menu.endstop_sound       = ENDSTOP_VOICE_SP;
+            voice_menu.print_complete_tone = PRINT_COMPLRTION_TONE_SP;
+            voice_menu.no_filament_tone    = NO_FILAMENT_TONE_SP;
             //
             preheat_menu.adjust_title = TITLE_ADJUST_SP;
             preheat_menu.title        = TITLE_PREHEAT_SP;
@@ -1975,6 +2302,7 @@ void disp_language_init() {
             leveling_menu.position3 = LEVELING_POINT3_TEXT_SP;
             leveling_menu.position4 = LEVELING_POINT4_TEXT_SP;
             leveling_menu.position5 = LEVELING_POINT5_TEXT_SP;
+            leveling_menu.zoffset   = Z_OFF_SET_EN;
             //
             set_menu.title        = TITLE_SET_SP;
             set_menu.filesys      = FILESYS_TEXT_SP;
@@ -2019,6 +2347,7 @@ void disp_language_init() {
             wifi_menu.title     = WIFI_TEXT;
             wifi_menu.cloud     = CLOUD_TEXT_SP;
             wifi_menu.reconnect = WIFI_RECONNECT_TEXT_SP;
+            wifi_menu.wifi_connect = WIFI_CONNECTED_SP;
 
             cloud_menu.title        = TITLE_CLOUD_TEXT_SP;
             cloud_menu.bind         = CLOUD_BINDED_SP;
@@ -2104,6 +2433,7 @@ void disp_language_init() {
             printing_more_menu.temp       = PRINTING_TEMP_SP;
 
             print_file_dialog_menu.confirm               = DIALOG_CONFIRM_SP;
+            print_file_dialog_menu.reloading             = RELOADING_SP;
             print_file_dialog_menu.cancel                = DIALOG_CANCLE_SP;
             print_file_dialog_menu.print_file            = DIALOG_PRINT_MODEL_SP;
             print_file_dialog_menu.cancel_print          = DIALOG_CANCEL_PRINT_SP;
@@ -2117,6 +2447,7 @@ void disp_language_init() {
             print_file_dialog_menu.print_time            = DIALOG_PRINT_TIME_SP;
             print_file_dialog_menu.reprint               = DIALOG_REPRINT_SP;
             print_file_dialog_menu.wifi_enable_tips      = DIALOG_WIFI_ENABLE_TIPS_SP;
+            print_file_dialog_menu.autolevelingTips   = DIALOG_AUTO_LEVELING_TIPS_SP;
 
             pause_msg_menu.pausing       = MESSAGE_PAUSING_SP;
             pause_msg_menu.changing      = MESSAGE_CHANGING_SP;
@@ -2150,7 +2481,38 @@ void disp_language_init() {
           common_menu.print_special_title   = PRINTING_OTHER_LANGUGE;
           common_menu.pause_special_title   = PRINTING_PAUSE_OTHER_LANGUGE;
           common_menu.operate_special_title = PRINTING_OPERATION_OTHER_LANGUGE;
-
+          //
+          about_MENU.printerModel           = PRINTER_MODEL_FR;
+          about_MENU.printVolume            = BUILD_SIZE_FR;
+          about_MENU.filamentDiameter       = FILAMENT_DIAMETER_FR;
+          about_MENU.inputVoltage           = INPUT_VOLTAGE_FR;
+          about_MENU.version                = VERSION_FR;
+          about_MENU.support                = SUPPORT_FR;
+          about_MENU.contact                = SALES_FR;
+          //
+          printing_MENU.continueprint       = CONTINUE_PRINT_FR;
+          printing_MENU.add_filament        = ADD_FILAMENT_FR;
+          printing_MENU.back                = BACK_FR;
+          printing_MENU.found_reprint       = FOUND_REPRINT_FR;
+          printing_MENU.stop_print          = STOP_PRINT_FR;
+          printing_MENU.pause_print         = PAUSE_PRINT_FR;
+          printing_MENU.file_printed        = FILE_PRINTED_FR;
+          printing_MENU.print_return        = PRINT_RETURN_FR;
+          printing_MENU.FILAMENT_OUT        = FILAMENT_OUT_1_FR;
+          printing_MENU.FILAMENT_OUT_1        = FILAMENT_OUT_2_FR;
+          printing_MENU.FILAMENT_OUT_2        = FILAMENT_OUT_3_FR;
+          printing_MENU.print_complete      = PRINT_COMPLETE_FR;
+          printing_MENU.print_it_again      = PRINT_IT_AGAIN_FR;
+          printing_MENU.choose_file         = CHOOSE_FILE_EN;
+          printing_MENU.heating             = HEATING_FR;
+      printing_MENU.no_file_found       = NO_FILE_FOUND_FR;
+          //
+          #if ENABLED(MKS_WIFI_MODULE)
+            // tips
+            tips_menu.joining      = TEXT_WIFI_JOINING_FR;
+            tips_menu.failedJoin   = TEXT_WIFI_FAILED_JOIN_FR;
+            tips_menu.wifiConected = TEXT_WIFI_WIFI_CONECTED_FR;
+          #endif
           //
           main_menu.title        = TITLE_READYPRINT_FR;
           main_menu.preheat      = PREHEAT_TEXT_FR;
@@ -2164,6 +2526,14 @@ void disp_language_init() {
           main_menu.set          = SET_TEXT_FR;
           main_menu.more         = MORE_TEXT_FR;
           main_menu.tool         = TOOL_TEXT_FR;
+          main_menu.Emergency    = EMERGEMCY_FR;
+          main_menu.ok           = DIALOG_OK_FR;
+          main_menu.Ext          = EXT_FR;
+          main_menu.hotbed       = HOTBED_FR;
+            main_menu.low          = LOW_EN;
+            main_menu.high         = HIGH_EN;
+            main_menu.stop         = STOP_EN;
+            main_menu.Heating_nozzle = HEATING_NOZZLE_EN;
           // TOOL
           tool_menu.title        = TOOL_TEXT_FR;
           tool_menu.preheat      = TOOL_PREHEAT_FR;
@@ -2174,6 +2544,21 @@ void disp_language_init() {
           tool_menu.autoleveling = TOOL_AUTO_LEVELING_FR;
           tool_menu.filament     = TOOL_FILAMENT_FR;
           tool_menu.more         = TOOL_MORE_FR;
+          tool_menu.cool         = COOL_FR;
+          tool_menu.endstop      = ENDSTOP_FR;
+          tool_menu.voice        = VOICE_FR;
+          tool_menu.tempsetting  = TEMPSETTING_FR;
+          tool_menu.tringger     = ENDSTOP_TRIGGER_FR;
+          tool_menu.open         = ENDSTOP_OPEN_FR;
+          tool_menu.x_endstop    = ENDSTOP_X_ENDSTOP_FR;
+          tool_menu.y_endstop    = ENDSTOP_Y_ENDSTOP_FR;
+          tool_menu.z_endstop    = ENDSTOP_Z_ENDSTOP_FR;
+          tool_menu.material_detection = ENDSTOP_MATERIAL_DETECTION_FR;
+            //VOICE
+            voice_menu.button_sound        = BUTTON_VOICE_FR;
+            voice_menu.endstop_sound       = ENDSTOP_VOICE_FR;
+            voice_menu.print_complete_tone = PRINT_COMPLRTION_TONE_FR;
+            voice_menu.no_filament_tone    = NO_FILAMENT_TONE_FR;
           //
           preheat_menu.adjust_title = TITLE_ADJUST_FR;
           preheat_menu.title        = TITLE_PREHEAT_FR;
@@ -2209,6 +2594,7 @@ void disp_language_init() {
           leveling_menu.position3 = LEVELING_POINT3_TEXT_FR;
           leveling_menu.position4 = LEVELING_POINT4_TEXT_FR;
           leveling_menu.position5 = LEVELING_POINT5_TEXT_FR;
+          leveling_menu.zoffset   = Z_OFF_SET_EN;
           //
           set_menu.title        = TITLE_SET_FR;
           set_menu.filesys      = FILESYS_TEXT_FR;
@@ -2255,6 +2641,7 @@ void disp_language_init() {
           wifi_menu.title     = WIFI_NAME_TEXT_FR;
           wifi_menu.cloud     = CLOUD_TEXT_FR;
           wifi_menu.reconnect = WIFI_RECONNECT_TEXT_FR;
+          wifi_menu.wifi_connect = WIFI_CONNECTED_FR;
 
           cloud_menu.title        = TITLE_CLOUD_TEXT_FR;
           cloud_menu.bind         = CLOUD_BINDED_FR;
@@ -2338,6 +2725,7 @@ void disp_language_init() {
           printing_more_menu.temp       = PRINTING_TEMP_FR;
 
           print_file_dialog_menu.confirm               = DIALOG_CONFIRM_FR;
+          print_file_dialog_menu.reloading             = RELOADING_FR;
           print_file_dialog_menu.cancel                = DIALOG_CANCLE_FR;
           print_file_dialog_menu.print_file            = DIALOG_PRINT_MODEL_FR;
           print_file_dialog_menu.cancel_print          = DIALOG_CANCEL_PRINT_FR;
@@ -2351,6 +2739,7 @@ void disp_language_init() {
           print_file_dialog_menu.print_time            = DIALOG_PRINT_TIME_FR;
           print_file_dialog_menu.reprint               = DIALOG_REPRINT_FR;
           print_file_dialog_menu.wifi_enable_tips      = DIALOG_WIFI_ENABLE_TIPS_FR;
+          print_file_dialog_menu.autolevelingTips   = DIALOG_AUTO_LEVELING_TIPS_FR;
 
           pause_msg_menu.pausing       = MESSAGE_PAUSING_FR;
           pause_msg_menu.changing      = MESSAGE_CHANGING_FR;
@@ -2382,7 +2771,38 @@ void disp_language_init() {
           common_menu.print_special_title   = PRINTING_OTHER_LANGUGE;
           common_menu.pause_special_title   = PRINTING_PAUSE_OTHER_LANGUGE;
           common_menu.operate_special_title = PRINTING_OPERATION_OTHER_LANGUGE;
-
+          //
+          about_MENU.printerModel           = PRINTER_MODEL_IT;
+          about_MENU.printVolume            = BUILD_SIZE_IT;
+          about_MENU.filamentDiameter       = FILAMENT_DIAMETER_IT;
+          about_MENU.inputVoltage           = INPUT_VOLTAGE_IT;
+          about_MENU.version                = VERSION_IT;
+          about_MENU.support                = SUPPORT_IT;
+          about_MENU.contact                = SALES_IT;
+          //
+          printing_MENU.continueprint       = CONTINUE_PRINT_IT;
+          printing_MENU.add_filament        = ADD_FILAMENT_IT;
+          printing_MENU.back                = BACK_IT;
+          printing_MENU.found_reprint       = FOUND_REPRINT_IT;
+          printing_MENU.stop_print          = STOP_PRINT_IT;
+          printing_MENU.pause_print         = PAUSE_PRINT_IT;
+          printing_MENU.file_printed        = FILE_PRINTED_IT;
+          printing_MENU.print_return        = PRINT_RETURN_IT;
+          printing_MENU.FILAMENT_OUT        = FILAMENT_OUT_1_IT;
+          printing_MENU.FILAMENT_OUT_1        = FILAMENT_OUT_2_IT;
+          printing_MENU.FILAMENT_OUT_2        = FILAMENT_OUT_3_IT;
+          printing_MENU.print_complete      = PRINT_COMPLETE_IT;
+          printing_MENU.print_it_again      = PRINT_IT_AGAIN_IT;
+          printing_MENU.choose_file         = CHOOSE_FILE_EN;
+          printing_MENU.heating             = HEATING_IT;
+      printing_MENU.no_file_found       = NO_FILE_FOUND_IT;
+          //
+          #if ENABLED(MKS_WIFI_MODULE)
+            // tips
+            tips_menu.joining      = TEXT_WIFI_JOINING_IT;
+            tips_menu.failedJoin   = TEXT_WIFI_FAILED_JOIN_IT;
+            tips_menu.wifiConected = TEXT_WIFI_WIFI_CONECTED_IT;
+          #endif
           //
           main_menu.title        = TITLE_READYPRINT_IT;
           main_menu.preheat      = PREHEAT_TEXT_IT;
@@ -2396,6 +2816,14 @@ void disp_language_init() {
           main_menu.set          = SET_TEXT_IT;
           main_menu.more         = MORE_TEXT_IT;
           main_menu.tool         = TOOL_TEXT_IT;
+          main_menu.Emergency    = EMERGEMCY_IT;
+          main_menu.ok           = DIALOG_OK_IT;
+          main_menu.Ext          = EXT_IT;
+          main_menu.hotbed       = HOTBED_IT;
+            main_menu.low          = LOW_EN;
+            main_menu.high         = HIGH_EN;
+            main_menu.stop         = STOP_EN;
+            main_menu.Heating_nozzle = HEATING_NOZZLE_EN;
           // TOOL
           tool_menu.title        = TOOL_TEXT_IT;
           tool_menu.preheat      = TOOL_PREHEAT_IT;
@@ -2406,6 +2834,21 @@ void disp_language_init() {
           tool_menu.autoleveling = TOOL_AUTO_LEVELING_IT;
           tool_menu.filament     = TOOL_FILAMENT_IT;
           tool_menu.more         = TOOL_MORE_IT;
+          tool_menu.cool         = COOL_IT;
+          tool_menu.endstop      = ENDSTOP_IT;
+          tool_menu.voice        = VOICE_IT;
+          tool_menu.tempsetting  = TEMPSETTING_IT;
+          tool_menu.tringger     = ENDSTOP_TRIGGER_IT;
+          tool_menu.open         = ENDSTOP_OPEN_IT;
+          tool_menu.x_endstop    = ENDSTOP_X_ENDSTOP_IT;
+          tool_menu.y_endstop    = ENDSTOP_Y_ENDSTOP_IT;
+          tool_menu.z_endstop    = ENDSTOP_Z_ENDSTOP_IT;
+          tool_menu.material_detection = ENDSTOP_MATERIAL_DETECTION_IT;
+            //VOICE
+            voice_menu.button_sound        = BUTTON_VOICE_IT;
+            voice_menu.endstop_sound       = ENDSTOP_VOICE_IT;
+            voice_menu.print_complete_tone = PRINT_COMPLRTION_TONE_IT;
+            voice_menu.no_filament_tone    = NO_FILAMENT_TONE_IT;
           //
           preheat_menu.adjust_title = TITLE_ADJUST_IT;
           preheat_menu.title        = TITLE_PREHEAT_IT;
@@ -2444,6 +2887,7 @@ void disp_language_init() {
           leveling_menu.position3 = LEVELING_POINT3_TEXT_IT;
           leveling_menu.position4 = LEVELING_POINT4_TEXT_IT;
           leveling_menu.position5 = LEVELING_POINT5_TEXT_IT;
+          leveling_menu.zoffset   = Z_OFF_SET_EN;
           //
           set_menu.title        = TITLE_SET_IT;
           set_menu.filesys      = FILESYS_TEXT_IT;
@@ -2488,6 +2932,7 @@ void disp_language_init() {
           wifi_menu.title     = WIFI_NAME_TEXT_IT;
           wifi_menu.cloud     = CLOSE_TEXT_IT;
           wifi_menu.reconnect = WIFI_RECONNECT_TEXT_IT;
+          wifi_menu.wifi_connect = WIFI_CONNECTED_IT;
 
           cloud_menu.title        = TITLE_CLOUD_TEXT_IT;
           cloud_menu.bind         = CLOUD_BINDED_IT;
@@ -2571,6 +3016,7 @@ void disp_language_init() {
           printing_more_menu.speed      = PRINTING_CHANGESPEED_IT;
 
           print_file_dialog_menu.confirm               = DIALOG_CONFIRM_IT;
+          print_file_dialog_menu.reloading             = RELOADING_IT;
           print_file_dialog_menu.cancel                = DIALOG_CANCLE_IT;
           print_file_dialog_menu.print_file            = DIALOG_PRINT_MODEL_IT;
           print_file_dialog_menu.cancel_print          = DIALOG_CANCEL_PRINT_IT;
@@ -2584,6 +3030,7 @@ void disp_language_init() {
           print_file_dialog_menu.print_time            = DIALOG_PRINT_TIME_IT;
           print_file_dialog_menu.reprint               = DIALOG_REPRINT_IT;
           print_file_dialog_menu.wifi_enable_tips      = DIALOG_WIFI_ENABLE_TIPS_IT;
+          print_file_dialog_menu.autolevelingTips   = DIALOG_AUTO_LEVELING_TIPS_IT;
 
           pause_msg_menu.pausing       = MESSAGE_PAUSING_IT;
           pause_msg_menu.changing      = MESSAGE_CHANGING_IT;
@@ -2618,6 +3065,38 @@ void disp_language_init() {
       common_menu.pause_special_title   = PRINTING_PAUSE_OTHER_LANGUGE;
       common_menu.operate_special_title = PRINTING_OPERATION_OTHER_LANGUGE;
       //
+      about_MENU.printerModel           = PRINTER_MODEL_EN;
+      about_MENU.printVolume            = BUILD_SIZE_EN;
+      about_MENU.filamentDiameter       = FILAMENT_DIAMETER_EN;
+      about_MENU.inputVoltage           = INPUT_VOLTAGE_EN;
+      about_MENU.version                = VERSION_EN;
+      about_MENU.support                = SUPPORT_EN;
+      about_MENU.contact                = SALES_EN;
+      //
+      printing_MENU.continueprint       = CONTINUE_PRINT_EN;
+      printing_MENU.add_filament        = ADD_FILAMENT_EN;
+      printing_MENU.back                = BACK_EN;
+      printing_MENU.found_reprint       = FOUND_REPRINT_EN;
+      printing_MENU.stop_print          = STOP_PRINT_EN;
+      printing_MENU.pause_print         = PAUSE_PRINT_EN;
+      printing_MENU.file_printed        = FILE_PRINTED_EN;
+      printing_MENU.print_return        = PRINT_RETURN_EN;
+      printing_MENU.FILAMENT_OUT        = FILAMENT_OUT_1_EN;
+      printing_MENU.FILAMENT_OUT_1      = FILAMENT_OUT_2_EN;
+      printing_MENU.FILAMENT_OUT_2      = FILAMENT_OUT_3_EN;
+      printing_MENU.print_complete      = PRINT_COMPLETE_EN;
+      printing_MENU.print_it_again      = PRINT_IT_AGAIN_EN;
+      printing_MENU.choose_file         = CHOOSE_FILE_EN;
+      printing_MENU.heating             = HEATING_EN;
+      printing_MENU.no_file_found       = NO_FILE_FOUND_EN;
+      //
+      #if ENABLED(MKS_WIFI_MODULE)
+        // tips
+        tips_menu.joining      = TEXT_WIFI_JOINING_EN;
+        tips_menu.failedJoin   = TEXT_WIFI_FAILED_JOIN_EN;
+        tips_menu.wifiConected = TEXT_WIFI_WIFI_CONECTED_EN;
+      #endif
+      //
       main_menu.title        = TITLE_READYPRINT_EN;
       main_menu.preheat      = PREHEAT_TEXT_EN;
       main_menu.move         = MOVE_TEXT_EN;
@@ -2630,6 +3109,14 @@ void disp_language_init() {
       main_menu.set          = SET_TEXT_EN;
       main_menu.more         = MORE_TEXT_EN;
       main_menu.tool         = TOOL_TEXT_EN;
+      main_menu.Emergency    = EMERGEMCY_EN;
+      main_menu.ok           = DIALOG_OK_EN;
+      main_menu.Ext          = EXT_EN;
+      main_menu.hotbed       = HOTBED_EN;
+      main_menu.low          = LOW_EN;
+      main_menu.high         = HIGH_EN;
+      main_menu.stop         = STOP_EN;
+      main_menu.Heating_nozzle = HEATING_NOZZLE_EN;
       // TOOL
       tool_menu.title        = TOOL_TEXT_EN;
       tool_menu.preheat      = TOOL_PREHEAT_EN;
@@ -2640,6 +3127,21 @@ void disp_language_init() {
       tool_menu.autoleveling = TOOL_AUTO_LEVELING_EN;
       tool_menu.filament     = TOOL_FILAMENT_EN;
       tool_menu.more         = TOOL_MORE_EN;
+      tool_menu.cool         = COOL_EN;
+      tool_menu.tempsetting  = TEMPSETTING_EN;
+      tool_menu.endstop      = ENDSTOP_EN;
+      tool_menu.voice        = VOICE_EN;
+      tool_menu.tringger     = ENDSTOP_TRIGGER_EN;
+      tool_menu.open         = ENDSTOP_OPEN_EN;
+      tool_menu.x_endstop    = ENDSTOP_X_ENDSTOP_EN;
+      tool_menu.y_endstop    = ENDSTOP_Y_ENDSTOP_EN;
+      tool_menu.z_endstop    = ENDSTOP_Z_ENDSTOP_EN;
+      tool_menu.material_detection = ENDSTOP_MATERIAL_DETECTION_EN;
+      //VOICE
+      voice_menu.button_sound        = BUTTON_VOICE_EN;
+      voice_menu.endstop_sound       = ENDSTOP_VOICE_EN;
+      voice_menu.print_complete_tone = PRINT_COMPLRTION_TONE_EN;
+      voice_menu.no_filament_tone    = NO_FILAMENT_TONE_EN;
       //
       preheat_menu.adjust_title = TITLE_ADJUST_EN;
       preheat_menu.title        = TITLE_PREHEAT_EN;
@@ -2678,6 +3180,7 @@ void disp_language_init() {
       leveling_menu.position3 = LEVELING_POINT3_TEXT_EN;
       leveling_menu.position4 = LEVELING_POINT4_TEXT_EN;
       leveling_menu.position5 = LEVELING_POINT5_TEXT_EN;
+      leveling_menu.zoffset   = Z_OFF_SET_EN;
       //
       set_menu.title        = TITLE_SET_EN;
       set_menu.filesys      = FILESYS_TEXT_EN;
@@ -2722,6 +3225,7 @@ void disp_language_init() {
       wifi_menu.title     = WIFI_TEXT;
       wifi_menu.cloud     = CLOUD_TEXT_EN;
       wifi_menu.reconnect = WIFI_RECONNECT_TEXT_EN;
+      wifi_menu.wifi_connect = WIFI_CONNECTED_EN;
 
       cloud_menu.title        = TITLE_CLOUD_TEXT_EN;
       cloud_menu.bind         = CLOUD_BINDED_EN;
@@ -2807,6 +3311,7 @@ void disp_language_init() {
       printing_more_menu.temp       = PRINTING_TEMP_EN;
 
       print_file_dialog_menu.confirm               = DIALOG_CONFIRM_EN;
+      print_file_dialog_menu.reloading             = RELOADING_EN;
       print_file_dialog_menu.cancel                = DIALOG_CANCLE_EN;
       print_file_dialog_menu.print_file            = DIALOG_PRINT_MODEL_EN;
       print_file_dialog_menu.cancel_print          = DIALOG_CANCEL_PRINT_EN;
@@ -2820,6 +3325,7 @@ void disp_language_init() {
       print_file_dialog_menu.print_time            = DIALOG_PRINT_TIME_EN;
       print_file_dialog_menu.reprint               = DIALOG_REPRINT_EN;
       print_file_dialog_menu.wifi_enable_tips      = DIALOG_WIFI_ENABLE_TIPS_EN;
+      print_file_dialog_menu.autolevelingTips   = DIALOG_AUTO_LEVELING_TIPS_EN;
 
       pause_msg_menu.pausing       = MESSAGE_PAUSING_EN;
       pause_msg_menu.changing      = MESSAGE_CHANGING_EN;

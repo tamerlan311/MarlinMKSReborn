@@ -78,8 +78,12 @@
 #include "draw_keyboard.h"
 #include "draw_media_select.h"
 #include "draw_encoder_settings.h"
-
+#include "draw_bltouch_settings.h"
 #include "../../../inc/MarlinConfigPre.h"
+#include "draw_endstop.h"
+#include "draw_voice.h"
+#include "draw_tempsetting.h"
+#include "draw_gcade.h"
 
 #if ENABLED(MKS_WIFI_MODULE)
   #include "wifiSerial.h"
@@ -110,11 +114,12 @@
   #define TFT_WIDTH         480
   #define TFT_HEIGHT        320
 
-  #define titleHeight        36   // TFT_screen.title_high
+  #define titleHeight         36   // TFT_screen.title_high
   #define INTERVAL_H          2   // TFT_screen.gap_h // 2
   #define INTERVAL_V          2   // TFT_screen.gap_v // 2
-  #define BTN_X_PIXEL       117   // TFT_screen.btn_x_pixel
-  #define BTN_Y_PIXEL       140   // TFT_screen.btn_y_pixel
+  #define BTN_X_PIXEL         117 // TFT_screen.btn_x_pixel 
+  #define BTN_X_PIXEL_150     150 // TFT_screen.btn_x_pixel 
+  #define BTN_Y_PIXEL         140   // TFT_screen.btn_y_pixel
 
   #define SIMPLE_FIRST_PAGE_GRAP   30
 
@@ -166,6 +171,10 @@
   #define PARA_UI_BACK_BTN_X_SIZE   70
   #define PARA_UI_BACK_BTN_Y_SIZE   40
 
+  #define PARA_UI_ARROW_V           12
+  #define PARA_UI_ITEM_TEXT_V       10
+  #define PARA_UI_ITEM_TEXT_H       10
+
   #define QRCODE_X                  20
   #define QRCODE_Y                  40
   #define QRCODE_WIDTH              160
@@ -181,8 +190,17 @@
   extern "C" { /* C-declarations for C++ */
 #endif
 
+
+LV_FONT_DECLARE(gb2312_songti26);
 extern char public_buf_m[100];
-extern char public_buf_l[30];
+extern char public_buf_l[50];
+extern char print_finish_time[50];
+// extern uint32_t preheat_1_temp_bed = PREHEAT_1_TEMP_BED;
+// extern uint32_t preheat_1_temp_hotend = PREHEAT_1_TEMP_HOTEND;
+// extern uint32_t preheat_2_temp_bed = PREHEAT_2_TEMP_BED;
+// extern uint32_t preheat_2_temp_hotend = PREHEAT_2_TEMP_HOTEND;
+extern bool Emergemcy_flog;
+extern bool Emergemcy_finish;
 
 typedef struct {
   uint32_t  spi_flash_flag;
@@ -206,7 +224,29 @@ typedef struct {
   celsius_t filament_limit_temp;
   float     pausePosX, pausePosY, pausePosZ;
   uint32_t  curFilesize;
+  bool  button_sound, 
+        endstop_sound,
+        print_completion_tone,
+        no_filament_tone;
+  uint32_t  PLA_EXT1,
+            PLA_BED,
+            ABS_EXT1, 
+            ABS_BED;
+  float babystep_data;
+  bool  add_full,
+        del_full;
 } CFG_ITMES;
+
+typedef struct Voice_struct{
+  
+  bool ButtonState, 
+       EndstopState, 
+       PrintState, 
+       NoFilamentState;
+  uint32_t VoiceStateTime, 
+           VoiceEndTime;
+}VOICES;
+extern VOICES voiceStatic;
 
 typedef struct UI_Config_Struct {
   uint8_t curTempType:1,
@@ -224,10 +264,12 @@ typedef struct UI_Config_Struct {
           filament_loading_completed:1,
           filament_unloading_completed:1,
           filament_loading_time_flg:1,
-          filament_unloading_time_flg:1;
+          filament_unloading_time_flg:1,
+          adjustZoffset:1;
   uint8_t wifi_name[32];
   uint8_t wifi_key[64];
   uint8_t cloud_hostUrl[96];
+  uint8_t autoLeveling;
   // Extruder Steps distances (mm)
   uint8_t extruStep;
   static constexpr uint8_t eStepMin =  1,
@@ -257,12 +299,16 @@ typedef struct UI_Config_Struct {
   float current_x_position_bak,
         current_y_position_bak,
         current_z_position_bak,
-        current_e_position_bak;
+        current_e_position_bak,
+        babyStepZoffsetDiff;
+  uint32_t print_speed,
+           ext_speed;
 } UI_CFG;
 
 typedef enum {
   MAIN_UI,
   PRINT_READY_UI,
+  PRINT_EMERGEMCY_UI,
   PRINT_FILE_UI,
   PRINTING_UI,
   MOVE_MOTOR_UI,
@@ -275,6 +321,7 @@ typedef enum {
   TEMP_UI,
   SET_UI,
   ZERO_UI,
+  BLTOUCH_UI,
   SPRAYER_UI,
   MACHINE_UI,
   LANGUAGE_UI,
@@ -337,6 +384,10 @@ typedef enum {
   TOUCH_CALIBRATION_UI,
   GCODE_UI,
   MEDIA_SELECT_UI,
+  ENDSTOP_UI,
+  VOICE_UI,
+  TEMPSETTING_UI,
+  GCADE_UI,
 } DISP_STATE;
 
 typedef struct {
@@ -425,8 +476,27 @@ typedef enum {
   wifiConfig,
   autoLevelGcodeCommand,
   GCodeCommand,
+  GCade,
+  GTempsetting,
 } keyboard_value_state;
 extern keyboard_value_state keyboard_value;
+
+typedef enum{
+  pla_ext1 = 1,
+  pla_bed,
+  abs_ext1,
+  abs_bed,
+  fan_speed,
+  print_speed,
+  ext_speed,
+}temp_value_state;
+extern temp_value_state temp_value;
+
+typedef enum{
+  print,
+  flow,
+}printflow_state;
+extern printflow_state printflow_speed;
 
 extern CFG_ITMES gCfgItems;
 extern UI_CFG uiCfg;
@@ -449,10 +519,35 @@ extern lv_style_t style_para_back;
 extern lv_style_t lv_bar_style_indic;
 extern lv_style_t style_btn_pr;
 extern lv_style_t style_btn_rel;
+extern lv_style_t tft_style_label_preheat;
+extern lv_style_t tft_style_bmp_ready;
+extern lv_style_t tft_style_preHeat_scr;//白底背景
+extern lv_style_t tft_style_label_big_black;//白底黑字
+extern lv_style_t tft_style_preHeat_label;//label为黑色字体
+extern lv_style_t tft_style_preHeat_label_WHITE;//白低白字 宋体
+extern lv_style_t tft_style_preHeat_label_BLACK;//白底黑字 宋体
+extern lv_style_t tft_style_preHeat_label_GRAY;//灰色字體
+extern lv_style_t tft_style_preHeat_WHITE_CIRCLE;//白底圆形
+extern lv_style_t tft_style_preHeat_GREEN;//绿色底
+extern lv_style_t tft_style_button_GREEN;
+extern lv_style_t tft_style_preHeat_YELLOW;
+extern lv_style_t tft_style_button_YELLOW;
+extern lv_style_t tft_style_filament_YELLOW;
+extern lv_style_t tft_style_preHeat_BLUE;
+extern lv_style_t tft_style_button_BLUE;
+extern lv_style_t tft_style_button_BLUE_WHITE;
+extern lv_style_t tft_style_button_RED;
+extern lv_style_t tft_style_wifi_WHITE;//白底大黑字
+extern lv_style_t tft_style_level_gray;
+extern lv_style_t label_dialog_white;
+extern lv_style_t label_dialog_black;
+extern lv_style_t z_step_style, z_step_re_style;
+extern lv_style_t z_label_bg_style;
 
 extern lv_point_t line_points[4][2];
 
 void gCfgItems_init();
+void voice_cfg_init();
 void ui_cfg_init();
 void tft_style_init();
 extern char *creat_title_text();
@@ -545,6 +640,11 @@ lv_obj_t* lv_screen_menu_item_1_edit(lv_obj_t *par, const char *text, lv_coord_t
 lv_obj_t* lv_screen_menu_item_2_edit(lv_obj_t *par, const char *text, lv_coord_t x, lv_coord_t y, lv_event_cb_t cb, const int id, const int index, const char *editValue, const int idEdit2, const char *editValue2);
 lv_obj_t* lv_screen_menu_item_onoff(lv_obj_t *par, const char *text, lv_coord_t x, lv_coord_t y, lv_event_cb_t cb, const int id, const int index, const bool curValue);
 void lv_screen_menu_item_onoff_update(lv_obj_t *btn, const bool curValue);
+
+
+extern void lv_top_return_name(lv_obj_t *par, const char *img, lv_event_cb_t cb, const int id/*=0*/);
+extern void lv_top_name(lv_obj_t *par, const char *img);
+
 
 // set scr id and title
 #ifdef USE_NEW_LVGL_CONF

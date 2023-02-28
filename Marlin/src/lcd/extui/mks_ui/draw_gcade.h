@@ -25,30 +25,10 @@
   extern "C" { /* C-declarations for C++ */
 #endif
 
-enum {
-  IDLE,
-  WORKING,
-  PAUSING,
-  PAUSED,
-  REPRINTING,
-  REPRINTED,
-  RESUMING,
-  STOP
-};
-
-void lv_draw_printing();
-void lv_clear_printing();
-void disp_ext_temp();
-void disp_bed_temp();
-void disp_fan_speed();
-void disp_print_time();
-void disp_fan_Zpos();
-void reset_print_time();
-void start_print_time();
-void stop_print_time();
-void setProBarRate();
-void disp_print_speed_change();
-void disp_printing_ext_speed();
+extern void lv_draw_gcade();
+extern void lv_clear_gcade();
+extern void lv_gcade_temp_refr();
+extern lv_obj_t *gcade_btn_label_create(lv_obj_t *par, lv_coord_t x, lv_coord_t y, const char *text,lv_event_cb_t cb, const int id/*=0*/);
 
 #ifdef __cplusplus
   } /* C-declarations for C++ */

@@ -25,30 +25,9 @@
   extern "C" { /* C-declarations for C++ */
 #endif
 
-enum {
-  IDLE,
-  WORKING,
-  PAUSING,
-  PAUSED,
-  REPRINTING,
-  REPRINTED,
-  RESUMING,
-  STOP
-};
-
-void lv_draw_printing();
-void lv_clear_printing();
-void disp_ext_temp();
-void disp_bed_temp();
-void disp_fan_speed();
-void disp_print_time();
-void disp_fan_Zpos();
-void reset_print_time();
-void start_print_time();
-void stop_print_time();
-void setProBarRate();
-void disp_print_speed_change();
-void disp_printing_ext_speed();
+extern void lv_draw_tempsetting();
+extern void lv_clear_tempsetting();
+extern void lv_tempsetting_temp_refr();
 
 #ifdef __cplusplus
   } /* C-declarations for C++ */

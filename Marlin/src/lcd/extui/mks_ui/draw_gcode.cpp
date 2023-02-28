@@ -48,7 +48,8 @@ static void event_handler(lv_obj_t *obj, lv_event_t event) {
       lv_draw_more();
       return;
     case ID_GCODE_COMMAND:
-      keyboard_value = GCodeCommand;
+      // keyboard_value = GCodeCommand;
+      keyboard_value = GCade;
       lv_draw_keyboard();
       break;
   }

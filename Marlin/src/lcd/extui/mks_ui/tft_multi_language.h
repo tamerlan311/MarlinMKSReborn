@@ -107,6 +107,14 @@ typedef struct machine_common_disp {
   const char *LevelingAutoCommandConf;
   const char *LevelingAutoZoffsetConf;
 
+  const char *BLTouchLevelingConfTitle;
+  const char *BLTouchLevelingConf;
+  const char *BLTouchInit;
+  const char *BLTouchOffsetpos;
+  const char *BLTouchOffsetneg;
+  const char *BLTouchSave;
+  const char *BLTouchTest;
+
   const char *LevelingSubConfTitle;
   const char *AutoLevelEnable;
   const char *BLtouchEnable;
@@ -306,6 +314,15 @@ typedef struct common_menu_disp {
 
 extern common_menu_def common_menu;
 
+typedef struct main_menu_disp_new {
+  const char *preheat;
+  const char *move;
+  const char *filament;
+  const char *tool;
+  const char *print;
+  const char *emergency;
+}main_menu_def_new;
+
 typedef struct main_menu_disp {
   const char *title;
   const char *preheat;
@@ -320,6 +337,15 @@ typedef struct main_menu_disp {
   const char *tool;
   const char *more;
   const char *machine_para;
+  const char *Emergency;
+  const char *ok;
+  const char *Ext;
+  const char *hotbed;
+  const char *low;
+  const char *high;
+  const char *stop;
+  const char *Heating_nozzle;
+  const char *filament;
 } main_menu_def;
 
 extern main_menu_def main_menu;
@@ -359,6 +385,7 @@ typedef struct move_menu_disp {
   const char *step_01mm;
   const char *step_1mm;
   const char *step_10mm;
+  const char *zoffset;
   const char *back;
 } move_menu_def;
 
@@ -420,6 +447,7 @@ typedef struct leveling_menu_disp {
   const char *position3;
   const char *position4;
   const char *position5;
+  const char *zoffset;
 
   char *back;
 } leveling_menu_def;
@@ -484,6 +512,7 @@ typedef struct wifi_menu_disp {
   const char *exception;
   const char *back;
   const char *reconnect;
+  const char *wifi_connect;
 } wifi_menu_def;
 
 extern wifi_menu_def wifi_menu;
@@ -687,6 +716,8 @@ typedef struct print_file_dialog_disp {
   const char *print_time;
   const char *reprint;
   const char *wifi_enable_tips;
+  const char *autolevelingTips;
+  const char *reloading;
 } print_file_dialog_menu_def;
 
 extern print_file_dialog_menu_def print_file_dialog_menu;
@@ -702,9 +733,30 @@ typedef struct tool_menu_disp {
   const char *filament;
   const char *more;
   const char *back;
+  const char *cool;
+  const char *tempsetting;
+  const char *voice;
+  const char *endstop;
+  const char *tringger;
+  const char *open;
+  const char *x_endstop;
+  const char *y_endstop;
+  const char *z_endstop;
+  const char *material_detection;
+  const char *high;
+  const char *low;
 } tool_menu_def;
 
 extern tool_menu_def tool_menu;
+
+typedef struct voice_menu_disp{
+  const char *button_sound;
+  const char *endstop_sound;
+  const char *print_complete_tone;
+  const char *no_filament_tone;
+}voice_menu_def;
+
+extern voice_menu_def voice_menu;
 
 typedef struct media_select_menu_disp {
   const char *title;
@@ -753,6 +805,39 @@ typedef struct eeprom_disp {
 } eeprom_def;
 
 extern eeprom_def eeprom_menu;
+
+typedef struct about_MENU_disp{
+  const char *printerModel;
+  const char *printVolume;
+  const char *filamentDiameter;
+  const char *inputVoltage;
+  const char *version;
+  const char *support;
+  const char *contact;
+}about_MENU_def;
+
+extern about_MENU_def about_MENU;
+
+typedef struct printing_disp{
+  const char *continueprint;
+  const char *add_filament;
+  const char *back;
+  const char *found_reprint;
+  const char *stop_print;
+  const char *pause_print;
+  const char *file_printed;
+  const char *print_return;
+  const char *FILAMENT_OUT;
+  const char *FILAMENT_OUT_1;
+  const char *FILAMENT_OUT_2;
+  const char *print_complete;
+  const char *print_it_again;
+  const char *choose_file;
+  const char *heating;
+  const char *no_file_found;
+}printing_def;
+
+extern printing_def printing_MENU;
 /*****************************************/
 //
 #define TEXT_VALUE          "%d/%d"
@@ -800,7 +885,8 @@ extern eeprom_def eeprom_menu;
 #define LANGUAGE_PR         "português"
 #define LANGUAGE_KR         "Korean"
 #define LANGUAGE_BR         "Brazil"
-#define LANGUAGE_RU         "русский"
+#define LANGUAGE_RU         "pyccKNN"
+#define RU_LANGUAGE         "русский"
 #define LANGUAGE_SP         "español"
 
 #define HOME_X_TEXT         "X"
@@ -817,8 +903,8 @@ extern eeprom_def eeprom_menu;
 #define FAN_CLOSE_TEXT      "0%"
 
 #define WIFI_TEXT                       "WIFI"
-#define WIFI_IP_TEXT                    "IP: "
-#define WIFI_NAME_TEXT                  "WiFi: "
+#define WIFI_IP_TEXT                    "IP Address: "
+#define WIFI_NAME_TEXT                  "WiFi Name: "
 #define WIFI_KEY_TEXT                   "Key: "
 #define WIFI_STATE_AP_TEXT              "State: AP"
 #define WIFI_STATE_STA_TEXT             "State: STA"

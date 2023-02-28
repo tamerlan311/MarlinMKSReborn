@@ -35,6 +35,8 @@ void lv_clear_ready_print();
 void lv_temp_refr();
 
 void set_main_screen(void);
+void lv_draw_emergemcy();
+void disp_emergency();
 
 #ifdef __cplusplus
   } /* C-declarations for C++ */

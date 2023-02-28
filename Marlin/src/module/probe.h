@@ -26,6 +26,7 @@
  */
 
 #include "../inc/MarlinConfig.h"
+#include "../Marlin/src/lcd/extui/mks_ui/draw_ui.h"
 
 #include "motion.h"
 

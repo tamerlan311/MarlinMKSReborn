@@ -25,30 +25,13 @@
   extern "C" { /* C-declarations for C++ */
 #endif
 
-enum {
-  IDLE,
-  WORKING,
-  PAUSING,
-  PAUSED,
-  REPRINTING,
-  REPRINTED,
-  RESUMING,
-  STOP
-};
-
-void lv_draw_printing();
-void lv_clear_printing();
-void disp_ext_temp();
-void disp_bed_temp();
-void disp_fan_speed();
-void disp_print_time();
-void disp_fan_Zpos();
-void reset_print_time();
-void start_print_time();
-void stop_print_time();
-void setProBarRate();
-void disp_print_speed_change();
-void disp_printing_ext_speed();
+extern void lv_draw_voice();
+extern void lv_clear_voice();
+extern void lv_voice_temp_refr();
+extern void voice_button_on();
+extern void voice_button_off();
+extern void endstop_sound_on();
+extern void endstop_sound_off();
 
 #ifdef __cplusplus
   } /* C-declarations for C++ */

@@ -29,9 +29,22 @@
 
 #include "../../../inc/MarlinConfig.h"
 #include "../../../gcode/queue.h"
+#include "../../../module/temperature.h"
+#include "../../../module/motion.h"
+#include "../../../module/planner.h"
+#include "../Marlin/src/gcode/gcode.h"
 
 extern lv_group_t *g;
 static lv_obj_t *scr;
+static lv_obj_t *numta , *ta;
+static lv_obj_t *buttonReturn, *btngcodesend;
+
+enum {
+  ID_GCADE_RETURN = 1,
+  ID_GCADE_BREAK,
+  ID_GCADE_TEMPSETTING,
+  ID_GCADE_SEND,
+};
 
 #define LV_KB_CTRL_BTN_FLAGS (LV_BTNM_CTRL_NO_REPEAT | LV_BTNM_CTRL_CLICK_TRIG)
 
@@ -62,6 +75,24 @@ static const char * kb_map_spec[] = {"0", "1", "2", "3", "4", "5", "6", "7", "8"
                                      "\\",  "@", "$", "(", ")", "{", "}", "[", "]", ";", "\"", "'", "\n",
                                      LV_SYMBOL_CLOSE, LV_SYMBOL_LEFT, " ", LV_SYMBOL_RIGHT, LV_SYMBOL_OK, ""};
 
+static const char * gcade_kb_map_spec[] = {"M","G","S","P","E"," ","\n",
+                                           "1","2","3",".","X"," ","\n",
+                                           "4","5","6","-","Y","____","\n",
+                                           "7","8","9","0","Z",LV_SYMBOL_BACKSPACE,""};
+static const lv_btnm_ctrl_t gcade_kb_ctrl_lc_map[] = {
+                         5, 5, 5, 5, 5, 5,
+                         5, 5, 5, 5, 5, 5,
+                         5, 5, 5, 5, 5, 5,
+                         5, 5, 5, 5, 5, 5};
+
+static const char * gtempsetting_kb_map_spec[] = {"1","2","3","0","\n",
+                                                  "4","5","6",".","\n",
+                                                  "7","8","9",LV_SYMBOL_BACKSPACE,""};
+static const lv_btnm_ctrl_t gtempsetting_kb_ctrl_lc_map[] = {
+                         5, 5, 5, 5,
+                         5, 5, 5, 5,
+                         5, 5, 5, 5,};
+
 static const lv_btnm_ctrl_t kb_ctrl_spec_map[] = {
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, LV_KB_CTRL_BTN_FLAGS | 2,
   LV_KB_CTRL_BTN_FLAGS | 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -75,8 +106,143 @@ static const lv_btnm_ctrl_t kb_ctrl_num_map[] = {
   1, 1, 1, 1, 1
 };
 
+static void event_handler(lv_obj_t *obj, lv_event_t event) {
+  if (event != LV_EVENT_RELEASED) return;
+
+  uint32_t speed = 0;
+  char gcodebuf[50];
+  
+  voice_button_on();
+  _delay_ms(100);
+  WRITE(BEEPER_PIN, LOW);
+
+  switch (obj->mks_obj_id) {
+    case ID_GCADE_RETURN:
+      lv_clear_keyboard();
+      switch (temp_value)
+      {
+      case pla_ext1:
+      case pla_bed:
+      case abs_ext1:
+      case abs_bed:
+        lv_draw_tempsetting();
+        break;
+      case fan_speed:
+      case print_speed:
+      case ext_speed:
+        draw_return_ui();
+      default:
+        break;
+      }
+      break;
+    case ID_GCADE_SEND:
+      strcpy(gcodebuf, lv_ta_get_text(ta));
+      gcode.process_subcommands_now_P(gcodebuf);
+      // lv_ta_add_text(ta, gcodebuf);
+      // if(!queue.ring_buffer.full(1))
+      // {
+      //   gcode.process_subcommands_now_P(gcodebuf);
+      // }
+        
+      // if (!queue.ring_buffer.full(3)) {
+      //       strcpy(gcodebuf, lv_ta_get_text(numta));
+      //       // Hook anything that goes to the serial port
+      //       MYSERIAL1.setHook(lv_serial_capt_hook, lv_eom_hook, 0);
+      //       queue.enqueue_one_now(gcodebuf);
+      // }
+      break;
+    case ID_GCADE_BREAK:
+      lv_clear_keyboard();
+      lv_draw_tool();
+      break;
+    case ID_GCADE_TEMPSETTING:
+      switch(temp_value)
+      {
+        case pla_ext1:
+          gCfgItems.PLA_EXT1 = atoi(lv_ta_get_text(numta));
+          update_spi_flash();
+          break;
+        case pla_bed:
+          gCfgItems.PLA_BED = atoi(lv_ta_get_text(numta));
+          update_spi_flash();
+          break;
+        case abs_ext1:
+          gCfgItems.ABS_EXT1 = atoi(lv_ta_get_text(numta));
+          update_spi_flash();
+          break;
+        case abs_bed:
+          gCfgItems.ABS_BED = atoi(lv_ta_get_text(numta));
+          update_spi_flash();
+          break;
+        case fan_speed:
+        speed = atoi(lv_ta_get_text(numta));
+        if(speed > 100)
+        {
+          thermalManager.set_fan_speed(0, map(100, 0, 100, 0, 255));
+          lv_ta_set_text(numta, "100");
+        }
+        else if(speed < 0)
+        {
+          thermalManager.set_fan_speed(0, map(0, 0, 100, 0, 255));
+          lv_ta_set_text(numta, "0");
+        }
+        else
+        {
+          thermalManager.set_fan_speed(0, map(speed, 0, 100, 0, 255));
+        }
+        break;
+        case print_speed:
+        speed = atoi(lv_ta_get_text(numta));
+        if(speed > MAX_PRINT_SPEED)
+        {
+          feedrate_percentage = MAX_PRINT_SPEED;
+          lv_ta_set_text(numta, "200");
+        }
+        else if (speed < MIN_PRINT_SPEED)
+        {
+          feedrate_percentage = MIN_PRINT_SPEED;
+          lv_ta_set_text(numta, "20");
+        }
+        else
+        {
+          feedrate_percentage = speed;
+        }
+        break;
+        case ext_speed:
+        speed = atoi(lv_ta_get_text(numta));
+        if(speed > MAX_EXT_SPEED)
+        {
+          planner.flow_percentage[0] = MAX_EXT_SPEED;
+          lv_ta_set_text(numta, "900");
+        }
+        else if (speed < MIN_EXT_SPEED)
+        {
+          planner.flow_percentage[0] = MIN_EXT_SPEED;
+          lv_ta_set_text(numta, "100");
+        }
+        else
+        {
+          planner.flow_percentage[0] = speed;
+        }
+        planner.refresh_e_factor(0);
+        break;
+        default: break;
+      }
+      lv_clear_keyboard();
+      // lv_draw_tempsetting();
+      draw_return_ui();
+      break;
+    default:
+      break;
+  }
+}
+
 static void lv_kb_event_cb(lv_obj_t *kb, lv_event_t event) {
   if (event != LV_EVENT_VALUE_CHANGED) return;
+
+  voice_button_on();
+  _delay_ms(100);
+  WRITE(BEEPER_PIN, LOW);
 
   lv_kb_ext_t *ext = (lv_kb_ext_t*)lv_obj_get_ext_attr(kb);
   const uint16_t btn_id = lv_btnm_get_active_btn(kb);
@@ -119,6 +285,14 @@ static void lv_kb_event_cb(lv_obj_t *kb, lv_event_t event) {
     if (kb->event_cb != lv_kb_def_event_cb) {
       const char * ret_ta_txt = lv_ta_get_text(ext->ta);
       switch (keyboard_value) {
+        case GCade:
+        if (!queue.ring_buffer.full(3)) {
+            // Hook anything that goes to the serial port
+            MYSERIAL1.setHook(lv_serial_capt_hook, lv_eom_hook, 0);
+            queue.enqueue_one_now(ret_ta_txt);
+          }
+          // lv_clear_keyboard();
+          // lv_draw_tool();
         #if ENABLED(MKS_WIFI_MODULE)
           case wifiName:
             memcpy(uiCfg.wifi_name, ret_ta_txt, sizeof(uiCfg.wifi_name));
@@ -189,8 +363,19 @@ static void lv_kb_event_cb(lv_obj_t *kb, lv_event_t event) {
     lv_ta_cursor_left(ext->ta);
   else if (strcmp(txt, LV_SYMBOL_RIGHT) == 0)
     lv_ta_cursor_right(ext->ta);
-  else if (strcmp(txt, LV_SYMBOL_BACKSPACE) == 0)
+  // else if (strcmp(txt, LV_SYMBOL_BACKSPACE) == 0)
+  else if (strcmp(txt, "<--") == 0 || strcmp(txt, LV_SYMBOL_BACKSPACE) == 0)
     lv_ta_del_char(ext->ta);
+  else if (strcmp(txt, " ") == 0)
+  {
+    if(keyboard_value != GCade)
+      lv_ta_add_text(ext->ta, " ");
+  }
+  else if(strcmp(txt, "____") == 0)
+  {
+    if(keyboard_value == GCade)
+      lv_ta_add_text(ext->ta, " ");
+  }
   else if (strcmp(txt, "+/-") == 0) {
     uint16_t cur = lv_ta_get_cursor_pos(ext->ta);
     const char * ta_txt = lv_ta_get_text(ext->ta);
@@ -221,7 +406,7 @@ void lv_draw_keyboard() {
   scr = lv_screen_create(KEYBOARD_UI, "");
 
   // Create styles for the keyboard
-  static lv_style_t rel_style, pr_style;
+  static lv_style_t rel_style, pr_style , label_style, ta_style;
 
   lv_style_copy(&rel_style, &lv_style_btn_rel);
   rel_style.body.radius       = 0;
@@ -235,22 +420,74 @@ void lv_draw_keyboard() {
   pr_style.body.main_color   = lv_color_make(0x72, 0x42, 0x15);
   pr_style.body.grad_color   = lv_color_make(0x6A, 0x3A, 0x0C);
 
+  lv_style_copy(&label_style, &tft_style_label_big_black);//tft_style_preHeat_label
+  label_style.body.radius       = 0;
+  label_style.body.border.width = 1;
+
+  lv_style_copy(&ta_style, &tft_style_label_big_black);
+  ta_style.body.main_color = LV_COLOR_BLACK;
+  ta_style.body.grad_color = LV_COLOR_BLACK;
+  ta_style.text.color = LV_COLOR_WHITE;
+
   // Create a keyboard and apply the styles
   lv_obj_t *kb = lv_kb_create(scr, nullptr);
   lv_obj_set_event_cb(kb, lv_kb_event_cb);
   lv_kb_set_cursor_manage(kb, true);
   lv_kb_set_style(kb, LV_KB_STYLE_BG, &lv_style_transp_tight);
-  lv_kb_set_style(kb, LV_KB_STYLE_BTN_REL, &rel_style);
-  lv_kb_set_style(kb, LV_KB_STYLE_BTN_PR, &pr_style);
+
+  if(keyboard_value == GCade)
+  {
+    lv_kb_set_style(kb, LV_KB_STYLE_BTN_REL, &label_style);
+    lv_kb_set_style(kb, LV_KB_STYLE_BTN_PR, &label_style);
+  }
+  else
+  {
+    lv_kb_set_style(kb, LV_KB_STYLE_BTN_REL, &rel_style);
+    lv_kb_set_style(kb, LV_KB_STYLE_BTN_PR, &pr_style);
+  }
+
   #if HAS_ROTARY_ENCODER
     if (gCfgItems.encoder_enable) {
     }
   #endif
 
+    lv_obj_t *imgtop = lv_obj_create(scr, nullptr);
+    lv_obj_set_style(imgtop, &tft_style_preHeat_BLUE);
+    lv_obj_set_size(imgtop, 480, 50);
+    lv_obj_set_pos(imgtop, 0, 0);
+    // lv_refr_now(lv_refr_get_disp_refreshing());
+
+    //create top img
+    // if(keyboard_value == GCade)
+    // {
+    //   // lv_obj_set_size(kb, 480, 255);
+    //   // lv_obj_set_pos(kb , 0, 65);
+
+    //   // buttonReturn = lv_imgbtn_create(scr, "F:/bmp_preHeat_return.bin", event_handler, ID_GCADE_BREAK);
+    //   // lv_obj_set_pos(buttonReturn, 6, 3);
+    //   // lv_obj_t *labelname = lv_label_create_empty(scr);
+    //   // lv_label_set_text(labelname, "Gcode");
+    //   // lv_obj_set_pos(labelname, 63, 13);
+    //   // btngcodesend = lv_imgbtn_create(scr, "F:/bmp_gcode_send.bin", event_handler, ID_GCADE_SEND);
+    //   // lv_obj_align(btngcodesend,imgtop, LV_ALIGN_IN_TOP_RIGHT, 0, 0);
+    //   // lv_refr_now(lv_refr_get_disp_refreshing());
+    // }
+    // else
+    // {
+    //   // lv_obj_align(kb, scr, LV_ALIGN_CENTER, 1, 85);
+    // }
+
   // Create a text area. The keyboard will write here
-  lv_obj_t *ta = lv_ta_create(scr, nullptr);
-  lv_obj_align(ta, nullptr, LV_ALIGN_IN_TOP_MID, 0, 10);
+  ta = lv_ta_create(scr, nullptr);
+  lv_obj_set_size(ta,238, 31);
+  if(keyboard_value == GCade)
+    lv_obj_set_style(ta, &ta_style);
+  else
+    // lv_ta_set_style(ta, LV_TA_STYLE_BG, &lv_style_pretty);
+    lv_obj_set_style(ta , &lv_style_pretty);
+  lv_obj_set_pos(ta, 130, 6);
   switch (keyboard_value) {
+    // case wifiConfig:
     case autoLevelGcodeCommand:
       get_gcode_command(AUTO_LEVELING_COMMAND_ADDR, (uint8_t *)public_buf_m);
       public_buf_m[sizeof(public_buf_m) - 1] = '\0';
@@ -261,12 +498,169 @@ void lv_draw_keyboard() {
       lv_btnm_set_map(kb, kb_map_uc);
       lv_btnm_set_ctrl_map(kb, kb_ctrl_uc_map);
       // Fallthrough
+    case GCade:
+      lv_btnm_set_map(kb, gcade_kb_map_spec);
+      lv_btnm_set_ctrl_map(kb, gcade_kb_ctrl_lc_map);
+    case GTempsetting:
     default:
       lv_ta_set_text(ta, "");
   }
 
   // Assign the text area to the keyboard
   lv_kb_set_ta(kb, ta);
+  if(keyboard_value == GCade)
+  {
+    lv_obj_set_size(kb, 480, 255);
+    lv_obj_set_pos(kb , 0, 65);
+
+    lv_refr_now(lv_refr_get_disp_refreshing());
+    buttonReturn = lv_imgbtn_create(scr, "F:/bmp_preHeat_return.bin", event_handler, ID_GCADE_BREAK);
+    lv_obj_set_pos(buttonReturn, 6, 3);
+    lv_obj_t *labelname = lv_label_create_empty(scr);
+    lv_label_set_text(labelname, "Gcode");
+    lv_obj_set_pos(labelname, 63, 13);
+    btngcodesend = lv_imgbtn_create(scr, "F:/bmp_gcode_send.bin", event_handler, ID_GCADE_SEND);
+    lv_obj_align(btngcodesend,imgtop, LV_ALIGN_IN_TOP_RIGHT, 0, 0);
+    // lv_refr_now(lv_refr_get_disp_refreshing());
+    // lv_imgbtn_set_src_both(buttonReturn, "F:/bmp_preHeat_return.bin");
+    // lv_refr_now(lv_refr_get_disp_refreshing());
+    // lv_imgbtn_set_src_both(btngcodesend, "F:/bmp_gcode_send.bin");
+  }
+  else
+  {
+    lv_obj_align(kb, scr, LV_ALIGN_CENTER, 1, 85);
+  }
+}
+
+void lv_draw_numkeyboard() {
+  scr = lv_screen_create(KEYBOARD_UI, "");
+
+  // Create styles for the keyboard
+  static lv_style_t rel_style, pr_style , label_style, label_blue_style;
+
+  lv_style_copy(&rel_style, &lv_style_btn_rel);
+  rel_style.body.radius       = 0;
+  rel_style.body.border.width = 1;
+  rel_style.body.main_color   = lv_color_make(0xA9, 0x62, 0x1D);
+  rel_style.body.grad_color   = lv_color_make(0xA7, 0x59, 0x0E);
+
+  lv_style_copy(&pr_style, &lv_style_btn_pr);
+  pr_style.body.radius       = 0;
+  pr_style.body.border.width = 1;
+  pr_style.body.main_color   = lv_color_make(0x72, 0x42, 0x15);
+  pr_style.body.grad_color   = lv_color_make(0x6A, 0x3A, 0x0C);
+
+  lv_style_copy(&label_style, &tft_style_label_big_black);
+  label_style.body.radius       = 0;
+  label_style.body.border.width = 1;
+
+  lv_style_copy(&label_blue_style, &tft_style_preHeat_label);
+  label_blue_style.body.main_color       = LV_COLOR_BLUE;
+  label_blue_style.body.grad_color       = LV_COLOR_BLUE;
+  label_blue_style.text.color            = LV_COLOR_WHITE;
+
+  // Create a keyboard and apply the styles
+  lv_obj_t *kb = lv_kb_create(scr, nullptr);
+  lv_obj_set_event_cb(kb, lv_kb_event_cb);
+  lv_kb_set_cursor_manage(kb, true);
+  lv_kb_set_style(kb, LV_KB_STYLE_BG, &lv_style_transp_tight);
+  lv_kb_set_style(kb, LV_KB_STYLE_BTN_REL, &label_style);
+  lv_kb_set_style(kb, LV_KB_STYLE_BTN_PR, &label_style);
+  #if HAS_ROTARY_ENCODER
+    if (gCfgItems.encoder_enable) {
+    }
+  #endif
+
+    //create top img
+  lv_obj_t *imgtop = lv_obj_create(scr, nullptr);
+  lv_obj_set_style(imgtop, &tft_style_preHeat_BLUE);
+  lv_obj_set_size(imgtop, 480, 50);
+  lv_obj_set_pos(imgtop, 0, 0);
+  // lv_refr_now(lv_refr_get_disp_refreshing());
+
+  lv_obj_t *buttonReturn = lv_imgbtn_create(scr, "F:/bmp_preHeat_return.bin", event_handler, ID_GCADE_RETURN);
+  lv_obj_set_pos(buttonReturn, 6, 3);
+  // lv_refr_now(lv_refr_get_disp_refreshing());
+  
+  lv_obj_t *btnOK = lv_label_btn_create(scr, event_handler, ID_GCADE_TEMPSETTING);
+  lv_obj_set_size(btnOK, 44, 42);
+  lv_btn_set_style(btnOK, LV_BTN_STYLE_REL, &label_blue_style);
+  lv_btn_set_style(btnOK, LV_BTN_STYLE_PR, &label_blue_style);
+  lv_obj_align(btnOK, imgtop, LV_ALIGN_IN_TOP_RIGHT, 0, 0);
+  lv_obj_t *labelOK = lv_label_create_empty(btnOK);
+  lv_label_set_text(labelOK , "OK");
+  lv_obj_align(labelOK,btnOK, LV_ALIGN_CENTER, 0, 0);
+
+  // Create a text area. The keyboard will write here
+  numta = lv_ta_create(scr, nullptr);
+  lv_obj_set_size(numta,98, 32);
+  lv_obj_set_style(numta , &tft_style_label_big_black);
+  char value[10] = {};
+  lv_obj_align(numta, imgtop, LV_ALIGN_OUT_BOTTOM_MID, 30, 10);
+  // lv_obj_set_pos(ta, 126, 6);
+  // lv_obj_align(ta, nullptr, LV_ALIGN_IN_TOP_MID, 0, 10);
+
+  switch (keyboard_value) {
+    case autoLevelGcodeCommand:
+      get_gcode_command(AUTO_LEVELING_COMMAND_ADDR, (uint8_t *)public_buf_m);
+      public_buf_m[sizeof(public_buf_m) - 1] = '\0';
+      lv_ta_set_text(numta, public_buf_m);
+      break;
+    case GCodeCommand:
+      // Start with uppercase by default
+      lv_btnm_set_map(kb, kb_map_uc);
+      lv_btnm_set_ctrl_map(kb, kb_ctrl_uc_map);
+      // Fallthrough
+    case GCade:
+      lv_btnm_set_map(kb, gcade_kb_map_spec);
+      lv_btnm_set_ctrl_map(kb, gcade_kb_ctrl_lc_map);
+    case GTempsetting:
+      lv_btnm_set_map(kb, gtempsetting_kb_map_spec);
+      lv_btnm_set_ctrl_map(kb, gtempsetting_kb_ctrl_lc_map);
+    default:
+      switch(temp_value)
+      {
+        case pla_ext1:
+          sprintf(value, "%d", gCfgItems.PLA_EXT1);
+          lv_ta_set_text(numta, value);
+          break;
+        case pla_bed:
+          sprintf(value, "%d", gCfgItems.PLA_BED);
+          lv_ta_set_text(numta, value);
+          break;
+        case abs_ext1:
+          sprintf(value, "%d", gCfgItems.ABS_EXT1);
+          lv_ta_set_text(numta, value);
+          break;
+        case abs_bed:
+          sprintf(value, "%d", gCfgItems.ABS_BED);
+          lv_ta_set_text(numta, value);
+          break;
+        case fan_speed:
+          sprintf_P(value, PSTR("%d"), (int)thermalManager.fanSpeedPercent(0));
+          lv_ta_set_text(numta, value);
+          break;
+        case print_speed:
+          sprintf_P(value, PSTR("%d"), feedrate_percentage);
+          lv_ta_set_text(numta, value);
+          break;
+        case ext_speed:
+          sprintf_P(value, PSTR("%d"), planner.flow_percentage[0]);
+          lv_ta_set_text(numta, value);
+          break;
+        default: 
+          lv_ta_set_text(numta, "");
+          break;
+      }
+  }
+
+  // Assign the text area to the keyboard
+  lv_kb_set_ta(kb, numta);
+  lv_obj_set_size(kb, 480, 225);
+  lv_obj_set_pos(kb , 0, 94);
+
+  // lv_refr_now(lv_refr_get_disp_refreshing());
+  // lv_imgbtn_set_src_both(buttonReturn , "F:/bmp_preHeat_return.bin");
 }
 
 void lv_clear_keyboard() {

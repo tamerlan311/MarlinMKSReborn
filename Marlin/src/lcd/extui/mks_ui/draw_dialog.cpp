@@ -30,6 +30,7 @@
 
 #include "draw_ui.h"
 #include <lv_conf.h>
+#include "printer_operation.h"
 
 #include "../../../sd/cardreader.h"
 #include "../../../gcode/queue.h"
@@ -55,6 +56,19 @@
   #include "draw_touch_calibration.h"
 #endif
 
+#if ENABLED(AUTO_BED_LEVELING_BILINEAR)
+  // #include "../../../../feature/bedlevel/bedlevel.h"
+  #include "../../../../src/feature/bedlevel/bedlevel.h"
+
+#endif
+
+#if ENABLED(AUTO_BED_LEVELING_BILINEAR)
+  extern bed_mesh_t z_values;
+#endif
+
+#define REPRINT_FLAG 0
+
+
 extern lv_group_t *g;
 static lv_obj_t *scr, *tempText1, *filament_bar;
 
@@ -64,6 +78,7 @@ extern int upload_result;
 extern uint32_t upload_time_sec;
 extern uint32_t upload_size;
 extern bool temps_update_flag;
+float z_offset_add = 0;
 
 //#define CANCEL_ON_RIGHT   // Put 'Cancel' on the right (as it was before)
 
@@ -72,8 +87,127 @@ extern bool temps_update_flag;
 #define BTN_OK_Y      180
 #define BTN_CANCEL_Y  180
 
+enum {
+  ID_LOG_OK = 1,
+  ID_LOG_CANCEL,
+};
+static void event_handler(lv_obj_t *obj, lv_event_t event) {
+  if (event != LV_EVENT_RELEASED) return;
+  switch (obj->mks_obj_id) {
+     case ID_LOG_OK:
+      wait_for_heatup = false;
+      stop_print_time();
+      lv_clear_dialog();
+      lv_draw_ready_print();
+
+      #if ENABLED(SDSUPPORT)
+        uiCfg.print_state = IDLE;
+        card.abortFilePrintSoon();
+      #endif
+
+      #if ENABLED(AUTO_BED_LEVELING_BILINEAR)
+        if (uiCfg.adjustZoffset) {
+          #if DISABLED(Z_MIN_PROBE_USES_Z_MIN_ENDSTOP_PIN)
+            for (uint8_t x = 0; x < GRID_MAX_POINTS_X; x++)
+              for (uint8_t y = 0; y < GRID_MAX_POINTS_Y; y++)
+                z_values[x][y] = z_values[x][y] + uiCfg.babyStepZoffsetDiff;
+          #endif
+          TERN_(EEPROM_SETTINGS, (void)settings.save());
+          uiCfg.babyStepZoffsetDiff = 0;
+          uiCfg.adjustZoffset       = 0;
+        }
+      #endif
+     break;
+     case ID_LOG_CANCEL:
+      if (DIALOG_IS(PAUSE_MESSAGE_OPTION)) {
+        TERN_(ADVANCED_PAUSE_FEATURE, pause_menu_response = PAUSE_RESPONSE_RESUME_PRINT);
+      }
+      else if (DIALOG_IS(TYPE_FILAMENT_LOAD_HEAT, TYPE_FILAMENT_UNLOAD_HEAT, TYPE_FILAMENT_HEAT_LOAD_COMPLETED, TYPE_FILAMENT_HEAT_UNLOAD_COMPLETED)) {
+        thermalManager.setTargetHotend(uiCfg.hotendTargetTempBak, uiCfg.extruderIndex);
+        clear_cur_ui();
+        draw_return_ui();
+      }
+      else if (DIALOG_IS(TYPE_FILAMENT_LOADING, TYPE_FILAMENT_UNLOADING)) {
+        queue.enqueue_one_P(PSTR("M410"));
+        uiCfg.filament_rate                = 0;
+        uiCfg.filament_loading_completed   = false;
+        uiCfg.filament_unloading_completed = false;
+        uiCfg.filament_loading_time_flg    = false;
+        uiCfg.filament_loading_time_cnt    = 0;
+        uiCfg.filament_unloading_time_flg  = false;
+        uiCfg.filament_unloading_time_cnt  = 0;
+        thermalManager.setTargetHotend(uiCfg.hotendTargetTempBak, uiCfg.extruderIndex);
+        clear_cur_ui();
+        draw_return_ui();
+      }
+      else {
+        clear_cur_ui();
+        draw_return_ui();
+      }
+     break;
+   }
+}
+
+static void btn_Reload_event_cb(lv_obj_t *btn, lv_event_t event)
+{
+  if (event != LV_EVENT_RELEASED) return;
+
+  voice_button_on();
+  _delay_ms(100);
+  WRITE(BEEPER_PIN, LOW); 
+
+  // char Reload[20] = "G28XY";
+  // queue.inject_P(PSTR(Reload));
+
+  #if HAS_GCODE_PREVIEW
+    preview_gcode_prehandle(list_file.file_name[sel_id]);
+  #endif
+  reset_print_time();
+  start_print_time();
+  baby_step_set_data = true;
+
+  uiCfg.print_state = WORKING;
+  lv_clear_dialog();
+  lv_draw_printing();
+
+  #if ENABLED(SDSUPPORT)
+    if (!gcode_preview_over) {
+      char *cur_name;
+      cur_name = strrchr(list_file.file_name[sel_id], '/');
+
+      SdFile file, *curDir;
+      card.abortFilePrintNow();
+      const char * const fname = card.diveToFile(false, curDir, cur_name);
+      if (!fname) return;
+      if (file.open(curDir, fname, O_READ)) {
+        gCfgItems.curFilesize = file.fileSize();
+        file.close();
+        update_spi_flash();
+      }
+      card.openFileRead(cur_name);
+      if (card.isFileOpen()) {
+        feedrate_percentage = 100;
+        planner.flow_percentage[0] = 100;
+        planner.e_factor[0] = planner.flow_percentage[0] * 0.01f;
+        #if HAS_MULTI_EXTRUDER
+          planner.flow_percentage[1] = 100;
+          planner.e_factor[1] = planner.flow_percentage[1] * 0.01f;
+        #endif
+        card.startOrResumeFilePrinting();
+        TERN_(POWER_LOSS_RECOVERY, recovery.prepare());
+        once_flag = false;
+      }
+    }
+  #endif
+}
+
 static void btn_ok_event_cb(lv_obj_t *btn, lv_event_t event) {
   if (event != LV_EVENT_RELEASED) return;
+
+  voice_button_on();
+  _delay_ms(100);
+  WRITE(BEEPER_PIN, LOW); 
+
   if (DIALOG_IS(TYPE_PRINT_FILE)) {
     #if HAS_GCODE_PREVIEW
       preview_gcode_prehandle(list_file.file_name[sel_id]);
@@ -84,6 +218,8 @@ static void btn_ok_event_cb(lv_obj_t *btn, lv_event_t event) {
     uiCfg.print_state = WORKING;
     lv_clear_dialog();
     lv_draw_printing();
+
+    baby_step_set_data = true;
 
     #if ENABLED(SDSUPPORT)
       if (!gcode_preview_over) {
@@ -118,23 +254,71 @@ static void btn_ok_event_cb(lv_obj_t *btn, lv_event_t event) {
   else if (DIALOG_IS(TYPE_STOP)) {
     wait_for_heatup = false;
     stop_print_time();
-    lv_clear_dialog();
-    lv_draw_ready_print();
+    baby_step_set_data = false;
 
     #if ENABLED(SDSUPPORT)
       uiCfg.print_state = IDLE;
       card.abortFilePrintSoon();
+      recovery.purge();
+    #endif
+
+    #if ENABLED(AUTO_BED_LEVELING_BILINEAR)
+      if (uiCfg.adjustZoffset) {
+        #if DISABLED(Z_MIN_PROBE_USES_Z_MIN_ENDSTOP_PIN)
+          for (uint8_t x = 0; x < GRID_MAX_POINTS_X; x++)
+            for (uint8_t y = 0; y < GRID_MAX_POINTS_Y; y++)
+              z_values[x][y] = z_values[x][y] + uiCfg.babyStepZoffsetDiff;
+        #endif
+        TERN_(EEPROM_SETTINGS, (void)settings.save());
+        uiCfg.babyStepZoffsetDiff = 0;
+        uiCfg.adjustZoffset       = 0;
+      }
+    #endif
+    
+    feedrate_percentage = 100;
+    planner.flow_percentage[0] = 100;
+    planner.e_factor[0] = planner.flow_percentage[0] * 0.01f;
+
+    lv_clear_dialog();
+    lv_draw_ready_print();
+  }
+  else if(DIALOG_IS(TYPE_PAUSE))
+  {
+    #if ENABLED(SDSUPPORT)
+      card.pauseSDPrint();
+      stop_print_time();
+      uiCfg.print_state = PAUSING;
+      clear_cur_ui();
+      draw_return_ui();
     #endif
   }
   else if (DIALOG_IS(TYPE_FINISH_PRINT)) {
+    
+    feedrate_percentage = 100;
+    planner.flow_percentage[0] = 100;
+    planner.e_factor[0] = planner.flow_percentage[0] * 0.01f;
+    baby_step_set_data = false;
+
     clear_cur_ui();
     lv_draw_ready_print();
+    #if ENABLED(AUTO_BED_LEVELING_BILINEAR)
+      if (uiCfg.adjustZoffset) {
+        #if DISABLED(Z_MIN_PROBE_USES_Z_MIN_ENDSTOP_PIN)
+          for (uint8_t x = 0; x < GRID_MAX_POINTS_X; x++)
+            for (uint8_t y = 0; y < GRID_MAX_POINTS_Y; y++)
+              z_values[x][y] = z_values[x][y] + uiCfg.babyStepZoffsetDiff;
+        #endif
+        TERN_(EEPROM_SETTINGS, (void)settings.save());
+        uiCfg.babyStepZoffsetDiff = 0;
+        uiCfg.adjustZoffset       = 0;
+      }
+    #endif
   }
   #if ENABLED(ADVANCED_PAUSE_FEATURE)
     else if (DIALOG_IS(PAUSE_MESSAGE_WAITING, PAUSE_MESSAGE_INSERT, PAUSE_MESSAGE_HEAT))
       wait_for_user = false;
     else if (DIALOG_IS(PAUSE_MESSAGE_OPTION))
-      pause_menu_response = PAUSE_RESPONSE_EXTRUDE_MORE;
+      // pause_menu_response = PAUSE_RESPONSE_EXTRUDE_MORE;
     else if (DIALOG_IS(PAUSE_MESSAGE_RESUME)) {
       clear_cur_ui();
       draw_return_ui();
@@ -184,6 +368,50 @@ static void btn_ok_event_cb(lv_obj_t *btn, lv_event_t event) {
       draw_return_ui();
     }
   #endif
+  else if (DIALOG_IS(TYPE_FILAMENT_RUNOUT))
+  {
+    #if 0
+    uiCfg.print_state = RESUMING;
+    start_print_time();
+    clear_cur_ui();    
+    if (gCfgItems.from_flash_pic)
+      flash_preview_begin = true;
+    else
+      default_preview_flg = true;
+    lv_draw_printing();
+    #else
+
+    uiCfg.print_speed = feedrate_percentage;
+    uiCfg.ext_speed = planner.flow_percentage[0];
+    
+    feedrate_percentage = 100;
+    planner.flow_percentage[0] = 100;
+    planner.e_factor[0] = planner.flow_percentage[0] * 0.01f;
+
+
+    uiCfg.moveSpeed_bak = (uint16_t)feedrate_mm_s;
+    uiCfg.hotendTargetTempBak = thermalManager.degTargetHotend(active_extruder);
+    clear_cur_ui();
+    lv_draw_filament_change();
+    #endif
+  }
+  else if (DIALOG_IS(TYPE_REPRINT))
+  {
+    baby_step_set_data = true;
+    if (gCfgItems.from_flash_pic)
+      flash_preview_begin = true;
+    else
+      default_preview_flg = true;
+    
+    uiCfg.print_state = REPRINTING;//REPRINTED
+    print_time.minutes = recovery.info.print_job_elapsed / 60;
+    print_time.seconds = recovery.info.print_job_elapsed % 60;
+    print_time.hours   = print_time.minutes / 60;
+    // start_print_time();
+
+    clear_cur_ui();
+    lv_draw_printing();
+  }
   else {
     clear_cur_ui();
     draw_return_ui();
@@ -192,6 +420,11 @@ static void btn_ok_event_cb(lv_obj_t *btn, lv_event_t event) {
 
 static void btn_cancel_event_cb(lv_obj_t *btn, lv_event_t event) {
   if (event != LV_EVENT_RELEASED) return;
+
+  voice_button_on();
+  _delay_ms(100);
+  WRITE(BEEPER_PIN, LOW); 
+
   if (DIALOG_IS(PAUSE_MESSAGE_OPTION)) {
     TERN_(ADVANCED_PAUSE_FEATURE, pause_menu_response = PAUSE_RESPONSE_RESUME_PRINT);
   }
@@ -200,7 +433,7 @@ static void btn_cancel_event_cb(lv_obj_t *btn, lv_event_t event) {
     clear_cur_ui();
     draw_return_ui();
   }
-  else if (DIALOG_IS(TYPE_FILAMENT_LOADING, TYPE_FILAMENT_UNLOADING)) {
+  else if (DIALOG_IS(TYPE_FILAMENT_LOADING, TYPE_FILAMENT_UNLOADING)) {//, TYPE_FILAMENT_RUNOUT
     queue.enqueue_one_P(PSTR("M410"));
     uiCfg.filament_rate                = 0;
     uiCfg.filament_loading_completed   = false;
@@ -212,6 +445,54 @@ static void btn_cancel_event_cb(lv_obj_t *btn, lv_event_t event) {
     thermalManager.setTargetHotend(uiCfg.hotendTargetTempBak, uiCfg.extruderIndex);
     clear_cur_ui();
     draw_return_ui();
+  }
+  else if(DIALOG_IS(TYPE_FILAMENT_RUNOUT))
+  {
+    wait_for_heatup = false;
+    stop_print_time();
+
+    #if ENABLED(SDSUPPORT)
+      uiCfg.print_state = IDLE;
+      card.abortFilePrintSoon();
+      recovery.purge();
+    #endif
+
+    #if ENABLED(AUTO_BED_LEVELING_BILINEAR)
+      if (uiCfg.adjustZoffset) {
+        #if DISABLED(Z_MIN_PROBE_USES_Z_MIN_ENDSTOP_PIN)
+          for (uint8_t x = 0; x < GRID_MAX_POINTS_X; x++)
+            for (uint8_t y = 0; y < GRID_MAX_POINTS_Y; y++)
+              z_values[x][y] = z_values[x][y] + uiCfg.babyStepZoffsetDiff;
+        #endif
+        TERN_(EEPROM_SETTINGS, (void)settings.save());
+        uiCfg.babyStepZoffsetDiff = 0;
+        uiCfg.adjustZoffset       = 0;
+      }
+    #endif
+    lv_clear_dialog();
+    lv_draw_ready_print();
+  }
+  else if(DIALOG_IS(TYPE_REPRINT))
+  {
+    #if REPRINT_FLAG
+    lv_clear_dialog();
+    #if ENABLED(SDSUPPORT)
+      uiCfg.print_state = IDLE;
+      card.abortFilePrintSoon();
+      recovery.purge();
+    #endif
+    lv_draw_ready_print();
+    #else
+    wait_for_heatup = false;
+    stop_print_time();
+    lv_clear_dialog();   
+    lv_draw_ready_print();
+    // recoveryed_flag = false;
+    #if ENABLED(SDSUPPORT)
+      uiCfg.print_state = IDLE;
+      card.abortFilePrintSoon();
+    #endif
+    #endif
   }
   else {
     clear_cur_ui();
@@ -225,11 +506,27 @@ void lv_draw_dialog(uint8_t type) {
   scr = lv_screen_create(DIALOG_UI);
 
   lv_obj_t *labelDialog = lv_label_create(scr, "");
+  lv_obj_set_style(labelDialog, &tft_style_preHeat_label);
 
-  if (DIALOG_IS(TYPE_FINISH_PRINT, PAUSE_MESSAGE_RESUME)) {
-    btnOk = lv_button_btn_create(scr, BTN_OK_X + 90, BTN_OK_Y, 100, 50, btn_ok_event_cb);
-    lv_obj_t *labelOk = lv_label_create_empty(btnOk);           // Add a label to the button
-    lv_label_set_text(labelOk, print_file_dialog_menu.confirm); // Set the labels text
+  // if(DIALOG_IS(TYPE_STOP))
+  if (DIALOG_IS(TYPE_FINISH_PRINT, PAUSE_MESSAGE_RESUME)) 
+  {
+    lv_obj_t *btnComplete = lv_button_btn_create(scr, 28, 228, 200, 80, btn_ok_event_cb);
+    lv_btn_set_style(btnComplete, LV_BTN_STYLE_REL,  &tft_style_button_GREEN);
+    lv_btn_set_style(btnComplete, LV_BTN_STYLE_PR,  &tft_style_button_GREEN);
+    lv_obj_t *labelOk = lv_label_create_empty(btnComplete);           // Add a label to the button
+    lv_obj_set_style(labelOk, &label_dialog_white);
+    lv_label_set_text(labelOk, printing_MENU.print_complete); // Set the labels text
+
+    lv_obj_t *btnAgain = lv_button_btn_create(scr, 253, 228, 200, 80, btn_Reload_event_cb);
+    lv_btn_set_style(btnAgain, LV_BTN_STYLE_REL,  &tft_style_button_YELLOW);
+    lv_btn_set_style(btnAgain, LV_BTN_STYLE_PR,  &tft_style_button_YELLOW);
+    lv_obj_t *labelCancel = lv_label_create_empty(btnAgain);           // Add a label to the button
+    lv_obj_set_style(labelCancel, &label_dialog_white);
+    lv_label_set_text(labelCancel, printing_MENU.print_it_again); // Set the labels text
+    if(DIALOG_IS(TYPE_FINISH_PRINT))
+      if(gCfgItems.print_completion_tone)
+        voice_button_on();
   }
   else if (DIALOG_IS(PAUSE_MESSAGE_WAITING, PAUSE_MESSAGE_INSERT, PAUSE_MESSAGE_HEAT)) {
     btnOk = lv_button_btn_create(scr, BTN_OK_X + 90, BTN_OK_Y, 100, 50, btn_ok_event_cb);
@@ -240,9 +537,15 @@ void lv_draw_dialog(uint8_t type) {
     // nothing to do
   }
   else if (DIALOG_IS(WIFI_ENABLE_TIPS)) {
-    btnCancel = lv_button_btn_create(scr, BTN_OK_X + 90, BTN_OK_Y, 100, 50, btn_cancel_event_cb);
-    lv_obj_t *labelCancel = lv_label_create_empty(btnCancel);
+    // btnCancel
+    lv_obj_t *btnWifiEnableCancle = lv_button_btn_create(scr, BTN_OK_X + 90, BTN_OK_Y, 100, 50, btn_cancel_event_cb);
+      lv_btn_set_style(btnWifiEnableCancle, LV_BTN_STYLE_REL, &tft_style_preHeat_GREEN);
+      lv_btn_set_style(btnWifiEnableCancle, LV_BTN_STYLE_PR,  &tft_style_preHeat_GREEN);
+    lv_obj_t *labelCancel = lv_label_create_empty(btnWifiEnableCancle);
+      // lv_obj_set_style(labelCancel, &tft_style_preHeat_label);
     lv_label_set_text(labelCancel, print_file_dialog_menu.cancel);
+    lv_obj_set_style(labelCancel, &label_dialog_white);
+    lv_obj_align(btnWifiEnableCancle, nullptr, LV_ALIGN_IN_BOTTOM_RIGHT, 0, 0);
   }
   else if (DIALOG_IS(TRANSFER_NO_DEVICE)) {
     btnCancel = lv_button_btn_create(scr, BTN_OK_X + 90, BTN_OK_Y, 100, 50, btn_cancel_event_cb);
@@ -254,7 +557,7 @@ void lv_draw_dialog(uint8_t type) {
       if (upload_result == 2) {
         btnCancel = lv_button_btn_create(scr, BTN_OK_X + 90, BTN_OK_Y, 100, 50, btn_cancel_event_cb);
         lv_obj_t *labelCancel = lv_label_create_empty(btnCancel);
-        lv_label_set_text(labelCancel, print_file_dialog_menu.cancel);
+        lv_label_set_text(labelCancel, print_file_dialog_menu.cancel);//bmp_wifi_reconnect
       }
       else if (upload_result == 3) {
         btnOk = lv_button_btn_create(scr, BTN_OK_X + 90, BTN_OK_Y, 100, 50, btn_ok_event_cb);
@@ -287,16 +590,168 @@ void lv_draw_dialog(uint8_t type) {
     filament_bar = lv_bar_create(scr, nullptr);
     lv_obj_set_pos(filament_bar, (TFT_WIDTH - 400) / 2, ((TFT_HEIGHT - titleHeight) - 40) / 2);
     lv_obj_set_size(filament_bar, 400, 25);
-    lv_bar_set_style(filament_bar, LV_BAR_STYLE_INDIC, &lv_bar_style_indic);
+    // lv_bar_set_style(filament_bar, LV_BAR_STYLE_INDIC, &lv_bar_style_indic);
     lv_bar_set_anim_time(filament_bar, 1000);
     lv_bar_set_value(filament_bar, 0, LV_ANIM_ON);
+  }
+  #if ENABLED(AUTO_BED_LEVELING_BILINEAR)
+    else if (DIALOG_IS(TYPE_AUTO_LEVELING_TIPS)) {
+      //nothing to do
+    }
+  #endif
+  else if (DIALOG_IS(TYPE_STOP)){
+    lv_obj_t *btnConfirm = lv_button_btn_create(scr, 168, 192, 130, 72, btn_ok_event_cb);
+    lv_btn_set_style(btnConfirm, LV_BTN_STYLE_REL, &tft_style_button_BLUE);
+    lv_btn_set_style(btnConfirm, LV_BTN_STYLE_PR,  &tft_style_button_BLUE);
+    lv_obj_t *labelOk = lv_label_create_empty(btnConfirm);             // Add a label to the button
+    lv_obj_set_style(labelOk, &label_dialog_white);
+
+    lv_obj_t *buttonCancel = lv_button_btn_create(scr, 15, 192, 130, 72, btn_cancel_event_cb);
+    lv_btn_set_style(buttonCancel, LV_BTN_STYLE_REL, &tft_style_button_BLUE);
+    lv_btn_set_style(buttonCancel, LV_BTN_STYLE_PR,  &tft_style_button_BLUE);
+    lv_obj_t *labelCancel = lv_label_create_empty(buttonCancel);     // Add a label to the button
+    lv_obj_set_style(labelCancel, &label_dialog_white);
+
+    lv_obj_t *btnReloading = lv_button_btn_create(scr, 320, 192, 130, 72, btn_Reload_event_cb);
+    lv_btn_set_style(btnReloading, LV_BTN_STYLE_REL, &tft_style_button_BLUE);
+    lv_btn_set_style(btnReloading, LV_BTN_STYLE_PR,  &tft_style_button_BLUE);
+    lv_obj_t *labelReloading = lv_label_create_empty(btnReloading);     // Add a label to the button
+    lv_obj_set_style(labelReloading, &label_dialog_white);
+    lv_refr_now(lv_refr_get_disp_refreshing());
+
+    if (DIALOG_IS(PAUSE_MESSAGE_OPTION)) {
+      lv_label_set_text(labelOk, pause_msg_menu.purgeMore);       // Set the labels text
+      lv_label_set_text(labelCancel, pause_msg_menu.continuePrint);
+    }
+    else {
+      lv_label_set_text(labelOk, print_file_dialog_menu.confirm); // Set the labels text
+      lv_label_set_text(labelCancel, print_file_dialog_menu.cancel);
+      lv_label_set_text(labelReloading, print_file_dialog_menu.reloading);
+    }
+  }
+  else if(DIALOG_IS(TYPE_PAUSE))
+  {
+    lv_obj_t *btnConfirm = lv_button_btn_create(scr, 168, 192, 130, 72, btn_ok_event_cb);
+    lv_btn_set_style(btnConfirm, LV_BTN_STYLE_REL, &tft_style_button_BLUE);
+    lv_btn_set_style(btnConfirm, LV_BTN_STYLE_PR,  &tft_style_button_BLUE);
+    lv_obj_t *labelOk = lv_label_create_empty(btnConfirm);             // Add a label to the button
+    lv_obj_set_style(labelOk, &label_dialog_white);
+
+    lv_obj_t *buttonCancel = lv_button_btn_create(scr, 15, 192, 130, 72, btn_cancel_event_cb);
+    lv_btn_set_style(buttonCancel, LV_BTN_STYLE_REL, &tft_style_button_BLUE);
+    lv_btn_set_style(buttonCancel, LV_BTN_STYLE_PR,  &tft_style_button_BLUE);
+    lv_obj_t *labelCancel = lv_label_create_empty(buttonCancel);     // Add a label to the button
+    lv_obj_set_style(labelCancel, &label_dialog_white);
+
+    lv_obj_t *btnReloading = lv_button_btn_create(scr, 320, 192, 130, 72, btn_Reload_event_cb);
+    lv_btn_set_style(btnReloading, LV_BTN_STYLE_REL, &tft_style_button_BLUE);
+    lv_btn_set_style(btnReloading, LV_BTN_STYLE_PR,  &tft_style_button_BLUE);
+    lv_obj_t *labelReloading = lv_label_create_empty(btnReloading);     // Add a label to the button
+    lv_obj_set_style(labelReloading, &label_dialog_white);
+    lv_refr_now(lv_refr_get_disp_refreshing());
+
+    if (DIALOG_IS(PAUSE_MESSAGE_OPTION)) {
+      lv_label_set_text(labelOk, pause_msg_menu.purgeMore);       // Set the labels text
+      lv_label_set_text(labelCancel, pause_msg_menu.continuePrint);
+    }
+    else {
+      lv_label_set_text(labelOk, print_file_dialog_menu.confirm); // Set the labels text
+      lv_label_set_text(labelCancel, print_file_dialog_menu.cancel);
+      lv_label_set_text(labelReloading, print_file_dialog_menu.reloading);
+    }
+  }
+  else if(DIALOG_IS(TYPE_FILAMENT_RUNOUT))
+  {
+    lv_obj_t *imgerr = lv_img_create(scr, NULL);
+    lv_img_set_src(imgerr, "F:/bmp_runout_err.bin");
+    lv_obj_set_pos(imgerr, 201, 32);
+
+    lv_obj_t *labelerr = lv_label_create_empty(scr);
+    lv_label_set_text(labelerr,printing_MENU.FILAMENT_OUT);
+    lv_obj_set_style(labelerr, &tft_style_preHeat_label_BLACK);
+    lv_obj_align(labelerr,imgerr, LV_ALIGN_CENTER, 0, 60);
+
+    lv_obj_t *labelerr_1 = lv_label_create_empty(scr);
+    lv_label_set_text(labelerr_1,printing_MENU.FILAMENT_OUT_1);
+    lv_obj_set_style(labelerr_1, &tft_style_preHeat_label_BLACK);
+    lv_obj_align(labelerr_1,labelerr, LV_ALIGN_CENTER, 0, 30);
+
+    lv_obj_t *labelerr_2 = lv_label_create_empty(scr);
+    lv_label_set_text(labelerr_2,printing_MENU.FILAMENT_OUT_2);
+    lv_obj_set_style(labelerr_2, &tft_style_preHeat_label_BLACK);
+    lv_obj_align(labelerr_2,labelerr_1, LV_ALIGN_CENTER, 0, 30);
+    // lv_obj_set_pos(labelerr, 82,118);
+
+    lv_obj_t *btnContinueP = lv_button_btn_create(scr, 28, 228, 200, 80, btn_ok_event_cb);
+    lv_btn_set_style(btnContinueP, LV_BTN_STYLE_REL,  &tft_style_button_GREEN);
+    lv_btn_set_style(btnContinueP, LV_BTN_STYLE_PR,  &tft_style_button_GREEN);
+    lv_obj_t *labelContinueP = lv_label_create_empty(btnContinueP);           // Add a label to the button
+    lv_obj_set_style(labelContinueP, &label_dialog_white);
+    lv_label_set_text(labelContinueP, printing_MENU.add_filament); // Set the labels text
+
+    lv_obj_t *btnReturnP = lv_button_btn_create(scr, 253, 228, 200, 80, btn_cancel_event_cb);
+    lv_btn_set_style(btnReturnP, LV_BTN_STYLE_REL,  &tft_style_button_YELLOW);
+    lv_btn_set_style(btnReturnP, LV_BTN_STYLE_PR,  &tft_style_button_YELLOW);
+    lv_obj_t *labelReturnP = lv_label_create_empty(btnReturnP);           // Add a label to the button
+    lv_obj_set_style(labelReturnP, &label_dialog_white);
+    lv_label_set_text(labelReturnP, printing_MENU.print_return); // Set the labels text
+  }
+  else if(DIALOG_IS(TYPE_REPRINT))
+  {
+    lv_obj_t *imgerr = lv_img_create(scr, NULL);
+    lv_img_set_src(imgerr, "F:/bmp_reprint_warning.bin");
+    lv_obj_set_pos(imgerr, 201, 32);
+
+    lv_obj_t *labelerr = lv_label_create_empty(scr);
+    lv_obj_set_style(labelerr, &tft_style_preHeat_label_BLACK);
+    lv_label_set_text(labelerr,printing_MENU.found_reprint);
+    lv_obj_align(labelerr, imgerr, LV_ALIGN_CENTER, 0, 60);
+    lv_obj_t *labelreprintfilename = lv_label_create_empty(scr);
+    lv_label_set_text(labelreprintfilename, list_file.long_name[sel_id]);
+    lv_obj_set_style(labelreprintfilename, &tft_style_preHeat_label_BLACK);
+    lv_obj_align(labelreprintfilename, labelerr, LV_ALIGN_CENTER, 0, 40);
+    
+
+    lv_obj_t *btnContinueP = lv_button_btn_create(scr, 28, 228, 200, 80, btn_ok_event_cb);
+    lv_btn_set_style(btnContinueP, LV_BTN_STYLE_REL,  &tft_style_button_GREEN);
+    lv_btn_set_style(btnContinueP, LV_BTN_STYLE_PR,  &tft_style_button_GREEN);
+    lv_obj_t *labelContinueP = lv_label_create_empty(btnContinueP);           // Add a label to the button
+    lv_obj_set_style(labelContinueP, &label_dialog_white);
+    lv_label_set_text(labelContinueP, printing_MENU.continueprint); // Set the labels text
+
+    lv_obj_t *btnReturnP = lv_button_btn_create(scr, 253, 228, 200, 80, btn_cancel_event_cb);
+    lv_btn_set_style(btnReturnP, LV_BTN_STYLE_REL,  &tft_style_button_YELLOW);
+    lv_btn_set_style(btnReturnP, LV_BTN_STYLE_PR,  &tft_style_button_YELLOW);
+    lv_obj_t *labelReturnP = lv_label_create_empty(btnReturnP);           // Add a label to the button
+    lv_obj_set_style(labelReturnP, &label_dialog_white);
+    lv_label_set_text(labelReturnP, printing_MENU.back); // Set the labels text
+  }
+  else if(DIALOG_IS(TYPE_PRINT_FILE))
+  {
+    lv_obj_t *btnToprint = lv_button_btn_create(scr, 37, 203, 173, 78, btn_ok_event_cb);
+    lv_btn_set_style(btnToprint, LV_BTN_STYLE_REL,  &tft_style_button_GREEN);
+    lv_btn_set_style(btnToprint, LV_BTN_STYLE_PR,  &tft_style_button_GREEN);
+    lv_obj_t *labelOk = lv_label_create_empty(btnToprint);             // Add a label to the button
+    lv_label_set_style(labelOk, LV_LABEL_STYLE_MAIN, &label_dialog_white);
+    lv_label_set_text(labelOk, print_file_dialog_menu.confirm);
+    lv_refr_now(lv_refr_get_disp_refreshing());
+
+    lv_obj_t *btnCancelprint = lv_button_btn_create(scr, 270, 203, 173, 78, btn_cancel_event_cb);
+    lv_btn_set_style(btnCancelprint, LV_BTN_STYLE_REL,  &tft_style_button_YELLOW);
+    lv_btn_set_style(btnCancelprint, LV_BTN_STYLE_PR,  &tft_style_button_YELLOW);
+    lv_obj_t *labelCancel = lv_label_create_empty(btnCancelprint);     // Add a label to the button
+    lv_label_set_style(labelCancel, LV_LABEL_STYLE_MAIN, &label_dialog_white);
+    lv_label_set_text(labelCancel, print_file_dialog_menu.cancel);
+    lv_refr_now(lv_refr_get_disp_refreshing());
   }
   else {
     btnOk = lv_button_btn_create(scr, BTN_OK_X, BTN_OK_Y, 100, 50, btn_ok_event_cb);
     lv_obj_t *labelOk = lv_label_create_empty(btnOk);             // Add a label to the button
+    lv_refr_now(lv_refr_get_disp_refreshing());
 
     btnCancel = lv_button_btn_create(scr, BTN_CANCEL_X, BTN_CANCEL_Y, 100, 50, btn_cancel_event_cb);
     lv_obj_t *labelCancel = lv_label_create_empty(btnCancel);     // Add a label to the button
+    lv_refr_now(lv_refr_get_disp_refreshing());
 
     if (DIALOG_IS(PAUSE_MESSAGE_OPTION)) {
       lv_label_set_text(labelOk, pause_msg_menu.purgeMore);       // Set the labels text
@@ -307,20 +762,43 @@ void lv_draw_dialog(uint8_t type) {
       lv_label_set_text(labelCancel, print_file_dialog_menu.cancel);
     }
   }
+
+  //create label
   if (DIALOG_IS(TYPE_PRINT_FILE)) {
     lv_label_set_text(labelDialog, print_file_dialog_menu.print_file);
-    lv_obj_align(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -20);
+    lv_obj_set_style(labelDialog, &tft_style_preHeat_label_BLACK);
+    lv_obj_align(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -5);
+    // lv_obj_set_pos(labelDialog, 142, 65);
 
     lv_obj_t *labelFile = lv_label_create(scr, list_file.long_name[sel_id]);
+    lv_obj_set_style(labelFile, &tft_style_preHeat_label_BLACK);
     lv_obj_align(labelFile, nullptr, LV_ALIGN_CENTER, 0, -60);
   }
   else if (DIALOG_IS(TYPE_STOP)) {
-    lv_label_set_text(labelDialog, print_file_dialog_menu.cancel_print);
+    lv_label_set_text(labelDialog, printing_MENU.stop_print);//print_file_dialog_menu.cancel_print
+    lv_obj_set_style(labelDialog, &tft_style_preHeat_label_BLACK);
+    lv_obj_align(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -20);
+  }
+  else if (DIALOG_IS(TYPE_PAUSE)) {
+    lv_label_set_text(labelDialog, printing_MENU.pause_print);
+    lv_obj_set_style(labelDialog, &tft_style_preHeat_label_BLACK);
     lv_obj_align(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -20);
   }
   else if (DIALOG_IS(TYPE_FINISH_PRINT)) {
-    lv_label_set_text(labelDialog, print_file_dialog_menu.print_finish);
-    lv_obj_align(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -20);
+    lv_label_set_text(labelDialog, list_file.long_name[sel_id]);
+    lv_obj_align(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -100);
+
+    lv_obj_t *labelFPD = lv_label_create_empty(scr);
+    lv_label_set_text(labelFPD, printing_MENU.file_printed);
+    lv_obj_set_style(labelFPD, &tft_style_preHeat_label_BLACK);
+    lv_obj_align(labelFPD, nullptr, LV_ALIGN_CENTER, 0, -40);
+    
+    lv_obj_t *labelFT = lv_label_create_empty(scr);
+    // char FTIME[100];
+    // sprintf(FTIME, "When %s", print_finish_time);
+    lv_label_set_text(labelFT, print_finish_time);
+    lv_obj_set_style(labelFT, &tft_style_preHeat_label_BLACK);
+    lv_obj_align(labelFT, nullptr, LV_ALIGN_CENTER, 0, 0);
   }
   else if (DIALOG_IS(PAUSE_MESSAGE_PARKING)) {
     lv_label_set_text(labelDialog, pause_msg_menu.pausing);
@@ -384,7 +862,16 @@ void lv_draw_dialog(uint8_t type) {
   }
   else if (DIALOG_IS(WIFI_ENABLE_TIPS)) {
     lv_label_set_text(labelDialog, print_file_dialog_menu.wifi_enable_tips);
-    lv_obj_align(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -20);
+    lv_obj_set_style(labelDialog, &tft_style_preHeat_label_BLACK);
+    lv_obj_align(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -60);
+
+    lv_obj_t *imgtop = lv_obj_create(scr, nullptr);
+    lv_obj_set_style(imgtop, &tft_style_preHeat_BLUE);
+    lv_obj_set_size(imgtop, 480, 50);
+    lv_obj_set_pos(imgtop, 0, 0);
+    lv_obj_t *labelname = lv_label_create_empty(imgtop);
+    lv_label_set_text(labelname,"WIFI");
+    lv_obj_align(labelname, imgtop, LV_ALIGN_IN_LEFT_MID, 0, 0);
   }
   else if (DIALOG_IS(TRANSFER_NO_DEVICE)) {
     lv_label_set_text(labelDialog, DIALOG_UPDATE_NO_DEVICE_EN);
@@ -470,6 +957,14 @@ void lv_draw_dialog(uint8_t type) {
       lv_obj_align(labelDialog, nullptr, LV_ALIGN_CENTER, 0, -70);
     }
   #endif
+
+  #if ENABLED(AUTO_BED_LEVELING_BILINEAR)
+    else if (DIALOG_IS(TYPE_AUTO_LEVELING_TIPS)) {
+      lv_label_set_text(labelDialog, print_file_dialog_menu.autolevelingTips);
+      lv_obj_align(labelDialog, NULL, LV_ALIGN_CENTER, 0, 0);
+    }
+  #endif
+  
   #if HAS_ROTARY_ENCODER
     if (gCfgItems.encoder_enable) {
       if (btnOk) lv_group_add_obj(g, btnOk);
@@ -486,6 +981,7 @@ void filament_sprayer_temp() {
   strcat_P(public_buf_l, PSTR(": "));
   strcat(public_buf_l, buf);
   lv_label_set_text(tempText1, public_buf_l);
+  lv_label_set_style(tempText1, LV_LABEL_STYLE_MAIN, &tft_style_preHeat_label);
   lv_obj_align(tempText1, nullptr, LV_ALIGN_CENTER, 0, -50);
 }
 
