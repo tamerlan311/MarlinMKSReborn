@@ -606,4 +606,5 @@ void GcodeSuite::G28() {
 
   TERN_(FULL_REPORT_TO_HOST_FEATURE, set_and_report_grblstate(old_grblstate));
 
+   set_bed_leveling_enabled(true);
 }
