@@ -35,6 +35,7 @@ uint16_t delta(uint16_t a, uint16_t b) { return a > b ? a - b : b - a; }
 
 SPI_HandleTypeDef XPT2046::SPIx;
 
+
 void XPT2046::Init() {
   SPI_TypeDef *spiInstance;
 
@@ -56,7 +57,7 @@ void XPT2046::Init() {
     SPIx.Init.NSS                = SPI_NSS_SOFT;
     SPIx.Init.Mode               = SPI_MODE_MASTER;
     SPIx.Init.Direction          = SPI_DIRECTION_2LINES;
-    SPIx.Init.BaudRatePrescaler  = SPI_BAUDRATEPRESCALER_8;
+    SPIx.Init.BaudRatePrescaler  = SPI_BAUDRATEPRESCALER_8;   //SPI_BAUDRATEPRESCALER_8
     SPIx.Init.CLKPhase           = SPI_PHASE_2EDGE;
     SPIx.Init.CLKPolarity        = SPI_POLARITY_HIGH;
     SPIx.Init.DataSize           = SPI_DATASIZE_8BIT;
@@ -116,7 +117,7 @@ bool XPT2046::getRawPoint(int16_t *x, int16_t *y) {
 
 uint16_t XPT2046::getRawData(const XPTCoordinate coordinate) {
   uint16_t data[3];
-
+  
   DataTransferBegin();
 
   for (uint16_t i = 0; i < 3 ; i++) {

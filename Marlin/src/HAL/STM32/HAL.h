@@ -280,6 +280,7 @@ public:
   static void set_pwm_frequency(const pin_t pin, const uint16_t f_desired);
 
 };
+//�빤
 inline void watchdog_refresh() {
   TERN_(USE_WATCHDOG, HAL_watchdog_refresh());
 }

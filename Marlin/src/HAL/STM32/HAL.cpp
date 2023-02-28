@@ -180,6 +180,7 @@ void HAL_SYSTICK_Callback() {
   if (systick_user_callback) systick_user_callback();
 }
 
+//冯工
 bool ret_e_dir_odr()
 {
   return (GPIOD->ODR & GPIO_PIN_3);
