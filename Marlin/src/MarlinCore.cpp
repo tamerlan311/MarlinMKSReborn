@@ -355,7 +355,7 @@ void startOrResumeJob() {
 }
 
 #if ENABLED(SDSUPPORT)
-
+    bool die_for_get = false;       //冯工
   inline void abortSDPrinting() {
     IF_DISABLED(NO_SD_AUTOSTART, card.autofile_cancel());
     card.abortFilePrintNow(TERN_(SD_RESORT, true));
@@ -370,6 +370,9 @@ void startOrResumeJob() {
     TERN(HAS_CUTTER, cutter.kill(), thermalManager.zero_fan_speeds()); // Full cutter shutdown including ISR control
 
     wait_for_heatup = false;
+
+    if(!die_for_get)
+      TERN_(POWER_LOSS_RECOVERY, recovery.purge());     //冯工
 
     TERN_(POWER_LOSS_RECOVERY, recovery.purge());
 
@@ -902,7 +905,7 @@ void kill(FSTR_P const lcd_error/*=nullptr*/, FSTR_P const lcd_component/*=nullp
     UNUSED(lcd_error); UNUSED(lcd_component);
   #endif
 
-  TERN_(HAS_TFT_LVGL_UI, lv_draw_error_message(lcd_error));
+  TERN_(HAS_TFT_LVGL_UI, lv_draw_error_message((PGM_P const)lcd_error));    //冯工
 
   // "Error:Printer halted. kill() called!"
   SERIAL_ERROR_MSG(STR_ERR_KILLED);
@@ -1671,7 +1674,10 @@ void loop() {
       if (card.flag.abort_sd_printing) abortSDPrinting();
       if (marlin_state == MF_SD_COMPLETE) finishSDPrinting();
     #endif
-
+    if(die_for_get)     //冯工
+    {
+        die_for_get = false;
+    }
     queue.advance();
 
     #if EITHER(POWER_OFF_TIMER, POWER_OFF_WAIT_FOR_COOLDOWN)
