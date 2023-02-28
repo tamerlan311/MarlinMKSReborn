@@ -1580,11 +1580,17 @@ void setup() {
   #if HAS_TFT_LVGL_UI  
     #if ENABLED(SDSUPPORT)
       #if ENABLED(MULTI_VOLUME)
-        // card.changeMedia(&card.media_driver_sdcard);
+        card.changeMedia(&card.media_driver_sdcard);
       #endif
+
       if (!card.isMounted()) SETUP_RUN(card.mount()); // Mount SD to load graphics and fonts
+
     #endif
     SETUP_RUN(tft_lvgl_init());
+    // #if ENABLED(SDSUPPORT)
+    //   if (!card.isMounted()) SETUP_RUN(card.mount()); // Mount SD to load graphics and fonts
+    // #endif
+    // SETUP_RUN(tft_lvgl_init());
   #endif
 
   #if BOTH(HAS_WIRED_LCD, SHOW_BOOTSCREEN)
