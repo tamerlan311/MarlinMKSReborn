@@ -35,6 +35,7 @@ GcodeSuite gcode;
 #include "parser.h"
 #include "queue.h"
 #include "../module/motion.h"
+#include "../../src/lcd/extui/mks_ui/draw_printing.h"
 
 #if ENABLED(PRINTCOUNTER)
   #include "../module/printcounter.h"
@@ -70,6 +71,9 @@ GcodeSuite gcode;
 #endif
 
 #include "../MarlinCore.h" // for idle, kill
+
+extern int32_t save_layer_stop_num;
+extern uint8_t layer_stop_flag;
 
 // Inactivity shutdown
 millis_t GcodeSuite::previous_move_ms = 0,
@@ -203,6 +207,16 @@ void GcodeSuite::get_destination_from_command() {
     else
       destination.e = current_position.e;
   #endif
+    if(layer_stop_flag == LAYER_STOP_NO_TRIGGERED){
+    if(save_layer_stop_num > 0)
+        {
+        if(IS_SD_PRINTING() &&((int32_t)(destination.z*100) == save_layer_stop_num))
+        {
+            paused_print();
+            layer_stop_flag = LAYER_STOP_TRIGGERED;
+        }
+        }
+    }
 
   #if ENABLED(POWER_LOSS_RECOVERY) && !PIN_EXISTS(POWER_LOSS)
     // Only update power loss recovery on moves with E
