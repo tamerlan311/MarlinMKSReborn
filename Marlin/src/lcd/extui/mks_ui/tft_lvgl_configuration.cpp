@@ -190,8 +190,8 @@ void tft_lvgl_init() {
     watchdog_refresh();   // LVGL init takes time
     TERN_(MKS_TEST, mks_test_get());
   #endif
-
-  touch.Init();
+  W25QXX.init(SPI_FULL_SPEED);
+  touch.Init();//觸屏
 
   lv_init();
 
@@ -365,7 +365,7 @@ void lv_fill_rect(lv_coord_t x1, lv_coord_t y1, lv_coord_t x2, lv_coord_t y2, lv
   height = y2 - y1 + 1;
   SPI_TFT.setWindow((uint16_t)x1, (uint16_t)y1, width, height);
   SPI_TFT.tftio.WriteMultiple(bk_color.full, width * height);
-  W25QXX.init(SPI_QUARTER_SPEED);
+  W25QXX.init(SPI_FULL_SPEED);
 }
 
 #define TICK_CYCLE 1
@@ -481,7 +481,7 @@ lv_fs_res_t spi_flash_open_cb (lv_fs_drv_t * drv, void * file_p, const char * pa
     strcpy(last_path_name, path);
   }
   else {
-    W25QXX.init(SPI_QUARTER_SPEED);
+    W25QXX.init(SPI_FULL_SPEED);
     currentFlashPage = 0;
   }
   pic_read_addr_offset = pic_read_base_addr;
