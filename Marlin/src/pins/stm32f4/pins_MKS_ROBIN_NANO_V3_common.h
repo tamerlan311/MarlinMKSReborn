@@ -134,8 +134,8 @@
 #define HEATER_1_PIN                        PB0   // HEATER2
 #define HEATER_BED_PIN                      PA0   // HOT BED
 
-#define FAN_PIN                             PC14  // FAN
-#define FAN1_PIN                            PB1   // FAN1
+// #define FAN_PIN                             PC14  // FAN
+#define FAN_PIN                            PB1   // FAN1
 
 //
 // Thermocouples
@@ -152,15 +152,16 @@
   #define MT_DET_PIN_STATE                  LOW
 #endif
 
+// #ifndef FIL_RUNOUT_PIN
+//   #define FIL_RUNOUT_PIN                    PA4
+// #endif
 #ifndef FIL_RUNOUT_PIN
-  #define FIL_RUNOUT_PIN                    PA4
-#endif
-#ifndef FIL_RUNOUT2_PIN
-  #define FIL_RUNOUT2_PIN                   PE6
+  #define FIL_RUNOUT_PIN                   PE6
 #endif
 
+
 #ifndef POWER_LOSS_PIN
-  #define POWER_LOSS_PIN                    PA13  // PW_DET
+//   #define POWER_LOSS_PIN                    PA13  // PW_DET
 #endif
 
 //#define SUICIDE_PIN                       PB2
@@ -192,9 +193,7 @@
 #define MKS_WIFI_MODULE_SERIAL   1  // USART1
 #define MKS_WIFI_MODULE_SPI      2  // SPI2
 
-#ifndef SDCARD_CONNECTION
-  #define SDCARD_CONNECTION              ONBOARD
-#endif
+
 
 // MKS WIFI MODULE
 #if ENABLED(MKS_WIFI_MODULE)
@@ -209,6 +208,9 @@
   #define MKS_TEST_PS_ON_PIN                PB2   // PW_OFF
 #endif
 
+#ifndef SDCARD_CONNECTION
+  #define SDCARD_CONNECTION              ONBOARD
+#endif
 //
 // Onboard SD card
 //
@@ -222,6 +224,7 @@
   #define SD_MOSI_PIN                       PC12
   #define SD_DETECT_PIN                     PD12
 #endif
+
 
 #define SPI_FLASH
 #if ENABLED(SPI_FLASH)
@@ -384,8 +387,8 @@
 #if ANY(TFT_COLOR_UI, TFT_LVGL_UI, TFT_CLASSIC_UI, HAS_WIRED_LCD)
   #define BEEPER_PIN                 EXP1_01_PIN
   #if DISABLED(USE_SPI_DMA_TC)
-    #define BTN_EN1                  EXP2_03_PIN
-    #define BTN_EN2                  EXP2_05_PIN
-    #define BTN_ENC                  EXP1_02_PIN
+    // #define BTN_EN1                  EXP2_03_PIN
+    // #define BTN_EN2                  EXP2_05_PIN
+    // #define BTN_ENC                  EXP1_02_PIN
   #endif
 #endif
