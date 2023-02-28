@@ -689,9 +689,9 @@ class Temperature {
           else if (temp_hotend[ee].target == 0)
             start_preheat_time(ee);
         #endif
-        TERN_(AUTO_POWER_CONTROL, if (celsius) powerManager.power_on());
+        TERN_(AUTO_POWER_CONTROL, if (celsius) powerManager.power_on());//启动加热
         temp_hotend[ee].target = _MIN(celsius, hotend_max_target(ee));
-        start_watching_hotend(ee);
+        start_watching_hotend(ee);//检测温度传感器
       }
 
       static inline bool isHeatingHotend(const uint8_t E_NAME) {

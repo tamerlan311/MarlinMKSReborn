@@ -206,7 +206,7 @@ void W25QXXFlash::SPI_FLASH_BlockErase(uint32_t BlockAddr) {
 
   SPI_FLASH_CS_H();
 
-  SPI_FLASH_WaitForWriteEnd();
+  SPI_FLASH_WaitForWriteEnd();//等待寫入完成
 }
 
 /*******************************************************************************
