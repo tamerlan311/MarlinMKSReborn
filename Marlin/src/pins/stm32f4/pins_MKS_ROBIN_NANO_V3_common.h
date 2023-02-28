@@ -23,7 +23,7 @@
 #pragma once
 
 //
-// MKS Robin Nano V3, MKS Eagle pinmap
+// MKS Robin Nano V3, MKS Eagle, MKS NANO6 pinmap, 
 //
 
 // #define MKS_TEST
@@ -60,8 +60,14 @@
 #define X_DIAG_PIN                          PA15
 #define Y_DIAG_PIN                          PD2
 #define Z_DIAG_PIN                          PC8
-#define E0_DIAG_PIN                         PC4
+
+#ifndef E0_DIAG_PIN
+  #define E0_DIAG_PIN                         PC4
+#endif
+
+#ifndef E1_DIAG_PIN
 #define E1_DIAG_PIN                         PE7
+#endif
 
 #define X_STOP_PIN                    X_DIAG_PIN
 #define Y_STOP_PIN                    Y_DIAG_PIN
@@ -71,11 +77,15 @@
 //
 // Steppers
 //
+#ifndef X_ENABLE_PIN
 #define X_ENABLE_PIN                        PE4
+#endif
 #define X_STEP_PIN                          PE3
 #define X_DIR_PIN                           PE2
 
-#define Y_ENABLE_PIN                        PE1
+#ifndef Y_ENABLE_PIN
+  #define Y_ENABLE_PIN                        PE1
+#endif
 #define Y_STEP_PIN                          PE0
 #define Y_DIR_PIN                           PB9
 
@@ -129,8 +139,8 @@
 #define HEATER_1_PIN                        PB0   // HEATER2
 #define HEATER_BED_PIN                      PA0   // HOT BED
 
-#define FAN_PIN                             PC14  // FAN
-#define FAN1_PIN                            PB1   // FAN1
+// #define FAN_PIN                             PC14  // FAN
+#define FAN_PIN                            PB1   // FAN1
 
 //
 // Thermocouples
@@ -142,7 +152,7 @@
 // Misc. Functions
 //
 #if HAS_TFT_LVGL_UI
-  #define MT_DET_1_PIN                      PA4   // MT_DET
+  // #define MT_DET_1_PIN                      PA4   // MT_DET
   #define MT_DET_2_PIN                      PE6
   #define MT_DET_PIN_STATE                  LOW
 #endif
@@ -299,6 +309,7 @@
   #define TOUCH_MOSI_PIN             EXP2_05_PIN  // SPI1_MOSI
 
   #define LCD_READ_ID                       0xD3
+  
   #define LCD_USE_DMA_SPI
 
   #define TFT_BUFFER_SIZE                  14400
@@ -319,7 +330,7 @@
     #define TOUCH_ORIENTATION    TOUCH_LANDSCAPE
   #endif
 
-  #define USE_SPI_DMA_TC
+  // #define USE_SPI_DMA_TC
 
 #elif HAS_WIRED_LCD
 
@@ -372,8 +383,8 @@
 #endif // HAS_WIRED_LCD
 
 #if ANY(TFT_COLOR_UI, TFT_LVGL_UI, TFT_CLASSIC_UI, HAS_WIRED_LCD)
-  // #define BEEPER_PIN                 EXP1_10_PIN
-  // #define BTN_EN1                    EXP2_08_PIN
-  // #define BTN_EN2                    EXP2_06_PIN
-  // #define BTN_ENC                    EXP1_09_PIN
+  #define BEEPER_PIN                 EXP1_10_PIN
+  #define BTN_EN1                    EXP2_08_PIN
+  #define BTN_EN2                    EXP2_06_PIN
+  #define BTN_ENC                    EXP1_09_PIN
 #endif
