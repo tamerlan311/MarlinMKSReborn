@@ -90,7 +90,7 @@ uint8_t public_buf[513];
 
 #ifdef USE_NEW_LVGL_CONF
   mks_ui_t mks_ui;
-#endif  
+#endif
 
 extern bool flash_preview_begin, default_preview_flg, gcode_preview_over;
 extern int32_t save_layer_stop_num ;
@@ -109,6 +109,7 @@ void SysTick_Callback() {
       uiCfg.filament_loading_time_cnt  = 0;
       uiCfg.filament_loading_time_flg  = false;
       uiCfg.filament_loading_completed = true;
+      // uiCfg.filament_rate = 100;
     }
   }
   if (uiCfg.filament_unloading_time_flg) {
@@ -123,8 +124,11 @@ void SysTick_Callback() {
   }
 }
 
+// #define USE_DMA_FSMC_TC_INT
+
 void tft_lvgl_init() {
 
+  // W25QXX.init(SPI_FULL_SPEED);
   W25QXX.init(SPI_QUARTER_SPEED);
 
   gCfgItems_init();//寫入flash
@@ -165,7 +169,20 @@ void tft_lvgl_init() {
     watchdog_refresh();
   #endif
 
-  hal.watchdog_refresh();     // LVGL init takes time
+  // #if ENABLED(USB_FLASH_DRIVE_SUPPORT)
+  //   uint16_t usb_flash_loop = 1000;
+  //   do {
+  //     // Sd2Card::idle();
+  //     card.media_driver_usbFlash.idle();
+  //     watchdog_refresh();
+  //     delay(2);
+  //   } while((!card.media_driver_usbFlash.isInserted()) && (usb_flash_loop--));
+  //   card.mount();
+  // #elif HAS_LOGO_IN_FLASH
+  //   delay(2000);
+  // #endif
+
+  watchdog_refresh();
 
   #if ENABLED(SDSUPPORT)
     UpdateAssets();//加載圖片和字庫
@@ -224,6 +241,7 @@ void tft_lvgl_init() {
   systick_attach_callback(SysTick_Callback);
 
   TERN_(HAS_SPI_FLASH_FONT, init_gb2312_font());
+//   TERN_(HAS_SPI_FLASH_FONT, init_gb2312_songti26());
 
   tft_style_init();
   filament_pin_setup();
@@ -260,7 +278,7 @@ void tft_lvgl_init() {
       Layout_stop_num.bottom_data = gCfgItems.Layout_stop_bottom_data;
       save_layer_stop_num = gCfgItems.save_layer_stop_num;
       save_disp_layer_stop_num = gCfgItems.save_disp_layer_stop_num;
-      
+
       lv_draw_dialog(DIALOG_TYPE_REPRINT);
     }
   #endif
@@ -285,13 +303,40 @@ void dma_tc(struct __DMA_HandleTypeDef * hdma) {
   lv_disp_flush_ready(disp_drv_p); // Indicate you are ready with the flushing
   lcd_dma_trans_lock = false;
 #if ENABLED(USE_DMA_FSMC_TC_INT)
-  
+
 #endif
 
 #if ENABLED(USE_SPI_DMA_TC)
   TFT_SPI::Abort();
 #endif
 }
+
+// void my_disp_flush(lv_disp_drv_t * disp, const lv_area_t * area, lv_color_t * color_p) {
+
+//   uint16_t width = area->x2 - area->x1 + 1,
+//           height = area->y2 - area->y1 + 1;
+
+//   disp_drv_p = disp;
+
+//   SPI_TFT.setWindow((uint16_t)area->x1, (uint16_t)area->y1, width, height);
+
+// #if EITHER(USE_DMA_FSMC_TC_INT, USE_SPI_DMA_TC)
+//   lcd_dma_trans_lock = true;
+//   SPI_TFT.tftio.WriteSequenceIT((uint16_t*)color_p, width * height);
+// #if ENABLED(USE_DMA_FSMC_TC_INT)
+//     TFT_FSMC::DMAtx.XferCpltCallback = dma_tc;
+// #endif
+
+// #if ENABLED(USE_SPI_DMA_TC)
+//   TFT_SPI::DMAtx.XferCpltCallback = dma_tc;
+// #endif
+
+// #else
+//   SPI_TFT.tftio.WriteSequence((uint16_t*)color_p, width * height);
+//   lv_disp_flush_ready(disp); // Indicate you are ready with the flushing
+// #endif
+//   W25QXX.init(SPI_FULL_SPEED);
+// }
 
 void my_disp_flush(lv_disp_drv_t * disp, const lv_area_t * area, lv_color_t * color_p) {
 
@@ -348,6 +393,32 @@ static bool get_point(int16_t *x, int16_t *y) {
 }
 
 bool my_touchpad_read(lv_indev_drv_t * indev_driver, lv_indev_data_t * data) {
+  // static int16_t last_x = 0, last_y = 0;
+  // if (get_point(&last_x, &last_y)) {
+  //   #if TFT_ROTATION == TFT_ROTATE_180
+
+  //     if(last_x > TFT_WIDTH) last_x = TFT_WIDTH;
+  //     if(last_y > TFT_HEIGHT) last_y = TFT_HEIGHT;
+
+  //     data->point.x = TFT_WIDTH - last_x;
+  //     data->point.y = TFT_HEIGHT - last_y;
+  //   #else
+  //     data->point.x = last_x;
+  //     data->point.y = last_y;
+  //   #endif
+  //   data->state = LV_INDEV_STATE_PR;
+  // }
+  // else {
+  //   #if TFT_ROTATION == TFT_ROTATE_180
+  //     data->point.x = TFT_WIDTH - last_x;
+  //     data->point.y = TFT_HEIGHT - last_y;
+  //   #else
+  //     data->point.x = last_x;
+  //     data->point.y = last_y;
+  //   #endif
+  //   data->state = LV_INDEV_STATE_REL;
+  // }
+
   static int16_t last_x = 0, last_y = 0;
   static uint8_t last_touch_state = LV_INDEV_STATE_REL;
   static int32_t touch_time1 = 0;

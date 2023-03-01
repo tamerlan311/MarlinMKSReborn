@@ -81,6 +81,52 @@
 
   void test_gpio_readlevel_L() {
 
+    // WRITE(WIFI_IO0_PIN, HIGH);
+    // delay(10);
+    // pw_det_sta = (READ(MKS_TEST_POWER_LOSS_PIN) == LOW);
+    // pw_off_sta = (READ(MKS_TEST_PS_ON_PIN) == LOW);
+    // mt_det_sta = (READ(MT_DET_1_PIN) == LOW);
+
+    // #if PIN_EXISTS(MT_DET_2)
+    //   mt_det2_sta = (READ(MT_DET_2_PIN) == LOW);
+    // #endif
+
+    // #if HAS_X_MIN
+    //   endstopx1_sta = ESTATE(X_MIN);
+    // #elif HAS_X_MAX
+    //   endstopx1_sta = ESTATE(X_MAX);
+    // #endif
+
+    // #if HAS_X2_MIN
+    //   endstopx2_sta = ESTATE(X2_MIN);
+    // #elif HAS_X2_MAX
+    //   endstopx2_sta = ESTATE(X2_MAX);
+    // #endif
+
+    // #if HAS_Y_MIN
+    //   endstopy1_sta = ESTATE(Y_MIN);
+    // #elif HAS_Y_MAX
+    //   endstopy1_sta = ESTATE(Y_MAX);
+    // #endif
+
+    // #if HAS_Y2_MIN
+    //   endstopy2_sta = ESTATE(Y2_MIN);
+    // #elif HAS_Y2_MAX
+    //   endstopy2_sta = ESTATE(Y2_MAX);
+    // #endif
+
+    // #if HAS_Z_MIN
+    //   endstopz1_sta = ESTATE(Z_MIN);
+    // #elif HAS_Z_MAX
+    //   endstopz1_sta = ESTATE(Z_MAX);
+    // #endif
+
+    // #if HAS_Z2_MIN
+    //   endstopz2_sta = ESTATE(Z2_MIN);
+    // #elif HAS_Z2_MAX
+    //   endstopz2_sta = ESTATE(Z2_MAX);
+    // #endif
+
     volatile uint32_t itest;
     WRITE(WIFI_IO0_PIN, HIGH);
     itest = 10000;
@@ -94,9 +140,49 @@
     endstopx1_sta = !READ(X_MIN_PIN);
     endstopy1_sta = !READ(Y_MIN_PIN);
     endstopz1_sta = !READ(Z_MIN_PIN);
+    // endstopz2_sta = !READ(MKS_TEST_Z_MAX_PIN);
   }
 
   void test_gpio_readlevel_H() {
+    // WRITE(WIFI_IO0_PIN, LOW);
+    // delay(10);
+    // pw_det_sta = (READ(MKS_TEST_POWER_LOSS_PIN) == HIGH);
+    // pw_off_sta = (READ(MKS_TEST_PS_ON_PIN) == HIGH);
+    // mt_det_sta = (READ(MT_DET_1_PIN) == HIGH);
+    // #if PIN_EXISTS(MT_DET_2)
+    //   mt_det2_sta = (READ(MT_DET_2_PIN) == HIGH);
+    // #endif
+    // #if HAS_X_MIN
+    //   endstopx1_sta = !ESTATE(X_MIN);
+    // #elif HAS_X_MAX
+    //   endstopx1_sta = !ESTATE(X_MAX);
+    // #endif
+    // #if HAS_X2_MIN
+    //   endstopx2_sta = !ESTATE(X2_MIN);
+    // #elif HAS_X2_MAX
+    //   endstopx2_sta = !ESTATE(X2_MAX);
+    // #endif
+    // #if HAS_Y_MIN
+    //   endstopy1_sta = !ESTATE(Y_MIN);
+    // #elif HAS_Y_MAX
+    //   endstopy1_sta = !ESTATE(Y_MAX);
+    // #endif
+    // #if HAS_Y2_MIN
+    //   endstopy2_sta = !ESTATE(Y2_MIN);
+    // #elif HAS_Y2_MAX
+    //   endstopy2_sta = !ESTATE(Y2_MAX);
+    // #endif
+    // #if HAS_Z_MIN
+    //   endstopz1_sta = !ESTATE(Z_MIN);
+    // #elif HAS_Z_MAX
+    //   endstopz1_sta = !ESTATE(Z_MAX);
+    // #endif
+    // #if HAS_Z2_MIN
+    //   endstopz2_sta = !ESTATE(Z2_MIN);
+    // #elif HAS_Z2_MAX
+    //   endstopz2_sta = !ESTATE(Z2_MAX);
+    // #endif
+
     volatile uint32_t itest;
     WRITE(WIFI_IO0_PIN, LOW);
     itest = 10000;
@@ -110,13 +196,54 @@
     endstopx1_sta = READ(X_MIN_PIN);
     endstopy1_sta = READ(Y_MIN_PIN);
     endstopz1_sta = READ(Z_MIN_PIN);
+    // endstopz2_sta = READ(MKS_TEST_Z_MAX_PIN);
   }
 
   void init_test_gpio() {
 
+    // endstops.init();
+
+    // SET_OUTPUT(WIFI_IO0_PIN);
+
+    // #if PIN_EXISTS(MT_DET_1)
+    //   SET_INPUT_PULLUP(MT_DET_1_PIN);
+    // #endif
+    // #if PIN_EXISTS(MT_DET_2)
+    //   SET_INPUT_PULLUP(MT_DET_2_PIN);
+    // #endif
+
+    // SET_INPUT_PULLUP(MKS_TEST_POWER_LOSS_PIN);
+    // SET_INPUT_PULLUP(MKS_TEST_PS_ON_PIN);
+    // SET_INPUT_PULLUP(SERVO0_PIN);
+
+    // OUT_WRITE(X_ENABLE_PIN, LOW);
+    // #if HAS_Y_AXIS
+    //   OUT_WRITE(Y_ENABLE_PIN, LOW);
+    // #endif
+    // #if HAS_Z_AXIS
+    //   OUT_WRITE(Z_ENABLE_PIN, LOW);
+    // #endif
+    // #if HAS_EXTRUDERS
+    //   OUT_WRITE(E0_ENABLE_PIN, LOW);
+    // #endif
+    // #if HAS_MULTI_EXTRUDER && DISABLED(MKS_HARDWARE_TEST_ONLY_E0)
+    //   OUT_WRITE(E1_ENABLE_PIN, LOW);
+    // #endif
+
+    // #if ENABLED(MKS_HARDWARE_TEST_ONLY_E0)
+    //   SET_INPUT_PULLUP(PA1);
+    //   SET_INPUT_PULLUP(PA3);
+    //   SET_INPUT_PULLUP(PC2);
+    //   SET_INPUT_PULLUP(PD8);
+    //   SET_INPUT_PULLUP(PE5);
+    //   SET_INPUT_PULLUP(PE6);
+    //   SET_INPUT_PULLUP(PE7);
+    // #endif
+
     SET_INPUT_PULLUP(X_MIN_PIN);
     SET_INPUT_PULLUP(Y_MIN_PIN);
     SET_INPUT_PULLUP(Z_MIN_PIN);
+    // SET_INPUT_PULLUP(MKS_TEST_Z_MAX_PIN);
 
     SET_OUTPUT(WIFI_IO0_PIN);
 
@@ -195,6 +322,13 @@
         disp_det_error();
       }
       watchdog_refresh();
+
+      // if (endstopx1_sta && endstopy1_sta && endstopz1_sta && endstopz2_sta) {
+      //   disp_Limit_ok();
+      // }
+      // else{
+      //   disp_Limit_error();
+      // }
 
       if ( (endstopx1_sta == true)
       && (endstopy1_sta == true)

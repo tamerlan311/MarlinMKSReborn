@@ -304,6 +304,20 @@ void lv_draw_operation() {
   #endif
 }
 
+// void draw_operation_btn(void) {
+//   buttonPreHeat  = lv_imgbtn_create(scr, "F:/bmp_temp.bin", INTERVAL_V, titleHeight, event_handler, ID_O_PRE_HEAT);
+//   buttonFilament = lv_imgbtn_create(scr, "F:/bmp_filamentchange.bin", BTN_X_PIXEL + INTERVAL_V * 2, titleHeight, event_handler, ID_O_FILAMENT);
+//   buttonFan      = lv_imgbtn_create(scr, "F:/bmp_fan.bin", BTN_X_PIXEL * 2 + INTERVAL_V * 3, titleHeight, event_handler, ID_O_FAN);
+//   buttonPowerOff = lv_imgbtn_create(scr, gCfgItems.finish_power_off ? "F:/bmp_auto_off.bin" : "F:/bmp_manual_off.bin", BTN_X_PIXEL * 3 + INTERVAL_V * 4, titleHeight, event_handler, ID_O_POWER_OFF);
+// }
+
+// void draw_opration_label(void) {
+//   labelPreHeat   = lv_label_create_empty(buttonPreHeat);
+//   label_Filament = lv_label_create_empty(buttonFilament);
+//   label_Fan      = lv_label_create_empty(buttonFan);
+//   label_PowerOff = lv_label_create_empty(buttonPowerOff);
+// }
+
 void lv_clear_operation() {
   #if HAS_ROTARY_ENCODER
     if (gCfgItems.encoder_enable) lv_group_remove_all_objs(g);

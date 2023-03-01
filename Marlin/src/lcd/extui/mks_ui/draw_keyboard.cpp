@@ -521,6 +521,26 @@ void lv_draw_keyboard() {
     lv_obj_set_pos(imgtop, 0, 0);
     // lv_refr_now(lv_refr_get_disp_refreshing());
 
+    //create top img
+    // if(keyboard_value == GCade)
+    // {
+    //   // lv_obj_set_size(kb, 480, 255);
+    //   // lv_obj_set_pos(kb , 0, 65);
+
+    //   // buttonReturn = lv_imgbtn_create(scr, "F:/bmp_preHeat_return.bin", event_handler, ID_GCADE_BREAK);
+    //   // lv_obj_set_pos(buttonReturn, 6, 3);
+    //   // lv_obj_t *labelname = lv_label_create_empty(scr);
+    //   // lv_label_set_text(labelname, "Gcode");
+    //   // lv_obj_set_pos(labelname, 63, 13);
+    //   // btngcodesend = lv_imgbtn_create(scr, "F:/bmp_gcode_send.bin", event_handler, ID_GCADE_SEND);
+    //   // lv_obj_align(btngcodesend,imgtop, LV_ALIGN_IN_TOP_RIGHT, 0, 0);
+    //   // lv_refr_now(lv_refr_get_disp_refreshing());
+    // }
+    // else
+    // {
+    //   // lv_obj_align(kb, scr, LV_ALIGN_CENTER, 1, 85);
+    // }
+
   // Create a text area. The keyboard will write here
   ta = lv_ta_create(scr, nullptr);
   lv_obj_set_size(ta,238, 31);

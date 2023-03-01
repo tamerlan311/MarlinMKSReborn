@@ -108,6 +108,122 @@ void printer_state_polling() {
       update_spi_flash();
     }
   }
+  // if (uiCfg.print_state == PAUSING) {
+  //   #if 0
+  //   #if ENABLED(SDSUPPORT)
+  //     if (!planner.has_blocks_queued() && card.getIndex() > MIN_FILE_PRINTED)
+  //       uiCfg.waitEndMoves++;
+
+  //     if (uiCfg.waitEndMoves > 20) {
+  //       uiCfg.waitEndMoves = 0;
+  //       planner.synchronize();
+
+  //       gcode.process_subcommands_now(PSTR("M25"));
+
+  //       // save the position
+  //       uiCfg.current_x_position_bak = current_position.x;
+  //       uiCfg.current_y_position_bak = current_position.y;
+  //       uiCfg.current_z_position_bak = current_position.z;
+
+  //       if (gCfgItems.pausePosZ != (float)-1) {
+  //         sprintf_P(public_buf_l, PSTR("G91\nG1 Z%s\nG90"), dtostrf(gCfgItems.pausePosZ, 1, 1, str_1));
+  //         gcode.process_subcommands_now(public_buf_l);
+  //       }
+  //       if (gCfgItems.pausePosX != (float)-1 && gCfgItems.pausePosY != (float)-1) {
+  //         sprintf_P(public_buf_l, PSTR("G1 X%s Y%s"), dtostrf(gCfgItems.pausePosX, 1, 1, str_1), dtostrf(gCfgItems.pausePosY, 1, 1, str_1));
+  //         gcode.process_subcommands_now(public_buf_l);
+  //       }
+  //       uiCfg.print_state = PAUSED;
+  //       uiCfg.current_e_position_bak = current_position.e;
+
+  //       gCfgItems.pause_reprint = true;
+  //       update_spi_flash();
+  //     }
+  //   #endif
+  //   #else
+  //   #if ENABLED(SDSUPPORT)
+  //     if (!planner.has_blocks_queued() && card.getIndex() > MIN_FILE_PRINTED)
+  //       uiCfg.waitEndMoves++;
+
+  //     if (uiCfg.waitEndMoves > 20) {
+  //       uiCfg.waitEndMoves = 0;
+  //       planner.synchronize();
+
+  //       gcode.process_subcommands_now(PSTR("M25"));
+
+  //       // save the position
+  //       uiCfg.current_x_position_bak = current_position.x;
+  //       uiCfg.current_y_position_bak = current_position.y;
+  //       uiCfg.current_z_position_bak = current_position.z;
+  //       planner.synchronize();
+
+  //       if (gCfgItems.pausePosZ != (float)-1) {
+  //         sprintf_P(public_buf_l, PSTR("G91\nG1 Z%s\nG90"), dtostrf(gCfgItems.pausePosZ, 1, 1, str_1));
+  //         gcode.process_subcommands_now(public_buf_l);
+  //       }
+  //       if (gCfgItems.pausePosX != (float)-1 && gCfgItems.pausePosY != (float)-1) {
+  //         sprintf_P(public_buf_l, PSTR("G1 X%s Y%s"), dtostrf(gCfgItems.pausePosX, 1, 1, str_1), dtostrf(gCfgItems.pausePosY, 1, 1, str_2));
+  //         gcode.process_subcommands_now(public_buf_l);
+  //       }
+  //       uiCfg.print_state = PAUSED;
+  //       uiCfg.current_e_position_bak = current_position.e;
+
+  //       gCfgItems.pause_reprint = true;
+  //       update_spi_flash();
+  //     }
+  //   #endif
+  //   #endif
+  // }
+  // else
+  //   uiCfg.waitEndMoves = 0;
+
+  // if (uiCfg.print_state == PAUSED) {
+  // }
+
+  // if (uiCfg.print_state == RESUMING) {
+  //   #if 0
+  //   if (IS_SD_PAUSED()) {
+  //     if (gCfgItems.pausePosX != (float)-1 && gCfgItems.pausePosY != (float)-1) {
+  //       sprintf_P(public_buf_m, PSTR("G1 X%s Y%s"), dtostrf(uiCfg.current_x_position_bak, 1, 1, str_1), dtostrf(uiCfg.current_y_position_bak, 1, 1, str_1));
+  //       gcode.process_subcommands_now(public_buf_m);
+  //     }
+  //     if (gCfgItems.pausePosZ != (float)-1) {
+  //       ZERO(public_buf_m);
+  //       sprintf_P(public_buf_m, PSTR("G1 Z%s"), dtostrf(uiCfg.current_z_position_bak, 1, 1, str_1));
+  //       gcode.process_subcommands_now(public_buf_m);
+  //     }
+      
+  //     ZERO(public_buf_m);
+  //     sprintf_P(public_buf_m, PSTR("G92 E%s"),  dtostrf(uiCfg.current_e_position_bak, 1, 1, str_1));
+  //     gcode.process_subcommands_now(public_buf_m);
+
+  //     gcode.process_subcommands_now(M24_STR);
+  //     uiCfg.print_state = WORKING;
+  //     start_print_time();
+
+  //     gCfgItems.pause_reprint = false;
+  //     update_spi_flash();
+  //   }
+  //   #else
+  //   if (IS_SD_PAUSED()) {
+  //     if (gCfgItems.pausePosX != (float)-1 && gCfgItems.pausePosY != (float)-1) {
+  //       sprintf_P(public_buf_m, PSTR("G1 X%s Y%s"), dtostrf(uiCfg.current_x_position_bak, 1, 1, str_1), dtostrf(uiCfg.current_y_position_bak, 1, 1, str_2));
+  //       gcode.process_subcommands_now(public_buf_m);
+  //     }
+  //     if (gCfgItems.pausePosZ != (float)-1) {
+  //       ZERO(public_buf_m);
+  //       sprintf_P(public_buf_m, PSTR("G1 Z%s"), dtostrf(uiCfg.current_z_position_bak, 1, 1, str_1));
+  //       gcode.process_subcommands_now(public_buf_m);
+  //     }
+  //     gcode.process_subcommands_now(M24_STR);
+  //     uiCfg.print_state = WORKING;
+  //     start_print_time();
+
+  //     gCfgItems.pause_reprint = false;
+  //     update_spi_flash();
+  //   }
+  //   #endif
+  // }
   #if ENABLED(POWER_LOSS_RECOVERY)
     if (uiCfg.print_state == REPRINTED) {
       #if HAS_HOTEND

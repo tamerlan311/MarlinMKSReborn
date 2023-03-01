@@ -61,6 +61,9 @@ enum {
 
 void disp_cur_pos() {
   char str_1[16];
+  // sprintf_P(public_buf_l, PSTR("%c:%s mm"), cur_label, dtostrf(cur_pos, 1, 1, str_1));
+  // if(!move_or_zero)
+  // {
     sprintf_P(public_buf_l, PSTR("X:%smm"), dtostrf((current_position.x - X_MIN_POS), 1, 1, str_1));//  cur_pos
     lv_label_set_text(labelX, public_buf_l);
 
@@ -69,6 +72,33 @@ void disp_cur_pos() {
 
     sprintf_P(public_buf_l, PSTR("Z:%smm"), dtostrf(current_position.z, 1, 1, str_1));//  cur_pos
     lv_label_set_text(labelZ, public_buf_l);
+  // }
+  // else{
+  //   lv_label_set_text(labelX, PSTR("X:0.0mm"));
+
+  //   lv_label_set_text(labelY, PSTR("Y:0.0mm"));
+
+  //   lv_label_set_text(labelZ, PSTR("Z:0.0mm"));
+  // }
+  
+  // switch(cur_label)
+  // {
+  //   case 'X':
+  //     if (labelX) {
+  //       lv_label_set_text(labelX, public_buf_l);
+  //     }
+  //     break;
+  //   case 'Y': 
+  //     if (labelY) {
+  //       lv_label_set_text(labelY, public_buf_l);
+  //     }
+  //     break;
+  //   case 'Z':
+  //     if (labelZ) {
+  //       lv_label_set_text(labelZ, public_buf_l);
+  //     } 
+  //     break;
+  // }
 }
 
 static void event_handler(lv_obj_t *obj, lv_event_t event) {
@@ -195,6 +225,19 @@ void lv_draw_move_motor() {
 #endif
   labelV = lv_label_create_empty(buttonV);
   lv_label_set_style(labelV, LV_LABEL_STYLE_MAIN, &label_dialog_white);
+  // #if HAS_ROTARY_ENCODER
+  //   if (gCfgItems.encoder_enable) {
+  //     lv_group_add_obj(g, buttonXAdd);
+  //     lv_group_add_obj(g, buttonXDec);
+  //     lv_group_add_obj(g, buttonYAdd);
+  //     lv_group_add_obj(g, buttonYDec);
+  //     lv_group_add_obj(g, buttonZAdd);
+  //     lv_group_add_obj(g, buttonZDec);
+  //     lv_group_add_obj(g, buttonZeroAll);
+  //     lv_group_add_obj(g, buttonCloseMotor);
+  //     lv_group_add_obj(g, buttonV);
+  //   }
+  // #endif
 
 
 #ifdef USE_NEW_LVGL_CONF

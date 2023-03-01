@@ -87,6 +87,20 @@ static void event_handler(lv_obj_t *obj, lv_event_t event) {
   _delay_ms(100);
   WRITE(BEEPER_PIN, LOW);
 
+  // if(event == LV_EVENT_PRESSED)
+  // {
+  //   //voice_button_on();
+  //   WRITE(BEEPER_PIN, HIGH);
+  // }
+  
+  // if(event == LV_EVENT_PRESS_LOST)
+  // {
+  //   WRITE(BEEPER_PIN, LOW);
+  // }
+
+  // if(event == LV_EVENT_RELEASED)
+  // {
+  //   WRITE(BEEPER_PIN, LOW);
     lv_clear_ready_print();
     switch (obj->mks_obj_id) {
       case ID_PRE_HEAT:  

@@ -343,6 +343,17 @@ void lv_draw_printing() {
 
   
 
+  // #if HAS_ROTARY_ENCODER
+  //   if (gCfgItems.encoder_enable) {
+  //     lv_group_add_obj(g, buttonPause);
+  //     lv_group_add_obj(g, buttonStop);
+  //     lv_group_add_obj(g, buttonOperat);
+  //     lv_group_add_obj(g, buttonPause);
+  //     lv_group_add_obj(g, buttonPause);
+  //     lv_group_add_obj(g, buttonPause);
+  //   }
+  // #endif
+
 
   #if HAS_MULTI_EXTRUDER
     labelExt2 = lv_label_create(scr, 395, 146, nullptr);
