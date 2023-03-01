@@ -36,7 +36,6 @@ GcodeSuite gcode;
 #include "queue.h"
 #include "../module/motion.h"
 #include "../../src/lcd/extui/mks_ui/draw_printing.h"
-
 #if ENABLED(PRINTCOUNTER)
   #include "../module/printcounter.h"
 #endif
@@ -217,7 +216,6 @@ void GcodeSuite::get_destination_from_command() {
         }
         }
     }
-
   #if ENABLED(POWER_LOSS_RECOVERY) && !PIN_EXISTS(POWER_LOSS)
     // Only update power loss recovery on moves with E
     if (recovery.enabled && IS_SD_PRINTING() && seen.e && (seen.x || seen.y))

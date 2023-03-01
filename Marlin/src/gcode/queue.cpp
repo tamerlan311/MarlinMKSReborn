@@ -332,7 +332,7 @@ inline void process_stream_char(const char c, uint8_t &sis, char (&buff)[MAX_CMD
     {
       Layout_stop_num.string[Layout_stop_num.index++] = c;
     }
-
+    
     if((Layout_stop_num.index > 15)&&(!Layout_stop_num.seek_flag))
     {
       if(strstr(Layout_stop_num.string,"Layer height") != NULL)

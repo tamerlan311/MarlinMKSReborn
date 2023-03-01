@@ -70,6 +70,7 @@
 extern bool baby_step_set_data;
 
 void GcodeSuite::M290() {
+    
   #if ENABLED(BABYSTEP_XY)
     LOOP_NUM_AXES(a)
       if (parser.seenval(AXIS_CHAR(a)) || (a == Z_AXIS && parser.seenval('S'))) {

@@ -148,11 +148,12 @@ uint16_t XPT2046::HardwareIO(uint16_t data) {
   //while ((SPIx.Instance->SR & SPI_FLAG_RXNE) != SPI_FLAG_RXNE) {}
   //__HAL_SPI_DISABLE(&SPIx);
   //return SPIx.Instance->DR;
-
+    
     uint8_t Rdate = 0;
     uint8_t Tdate = (uint8_t)data;
     HAL_SPI_TransmitReceive(&SPIx, &Tdate, &Rdate, 1, 1000);
     return Rdate;
+  
 }
 
 uint16_t XPT2046::SoftwareIO(uint16_t data) {

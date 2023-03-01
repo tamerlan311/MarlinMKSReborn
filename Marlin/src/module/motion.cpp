@@ -33,7 +33,6 @@
 #include "../lcd/marlinui.h"
 #include "../inc/MarlinConfig.h"
 #include "../lcd/extui/mks_ui/draw_ui.h"
-
 #if IS_SCARA
   #include "../libs/buzzer.h"
   #include "../lcd/marlinui.h"

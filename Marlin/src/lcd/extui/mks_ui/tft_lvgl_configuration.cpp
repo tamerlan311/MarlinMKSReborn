@@ -91,7 +91,7 @@ uint8_t public_buf[513];
 
 #ifdef USE_NEW_LVGL_CONF
   mks_ui_t mks_ui;
-#endif
+#endif  
 
 extern bool flash_preview_begin, default_preview_flg, gcode_preview_over;
 extern int32_t save_layer_stop_num ;
@@ -167,7 +167,7 @@ void tft_lvgl_init() {
     } while((!card.media_driver_usbFlash.isInserted()) && (usb_flash_loop--));
     card.mount();
   #elif HAS_LOGO_IN_FLASH
-    watchdog_refresh();
+    watchdog_refresh(); 
   #endif
 
   // #if ENABLED(USB_FLASH_DRIVE_SUPPORT)
@@ -183,7 +183,7 @@ void tft_lvgl_init() {
   //   delay(2000);
   // #endif
 
-  watchdog_refresh();
+  watchdog_refresh();   
 
   #if ENABLED(SDSUPPORT)
     UpdateAssets();//加載圖片和字庫
@@ -279,7 +279,7 @@ void tft_lvgl_init() {
       Layout_stop_num.bottom_data = gCfgItems.Layout_stop_bottom_data;
       save_layer_stop_num = gCfgItems.save_layer_stop_num;
       save_disp_layer_stop_num = gCfgItems.save_disp_layer_stop_num;
-
+      
       lv_draw_dialog(DIALOG_TYPE_REPRINT);
     }
   #endif
@@ -304,7 +304,7 @@ void dma_tc(struct __DMA_HandleTypeDef * hdma) {
   lv_disp_flush_ready(disp_drv_p); // Indicate you are ready with the flushing
   lcd_dma_trans_lock = false;
 #if ENABLED(USE_DMA_FSMC_TC_INT)
-
+  
 #endif
 
 #if ENABLED(USE_SPI_DMA_TC)
